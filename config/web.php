@@ -13,7 +13,8 @@ $config = [
     ],
     'components' => [
         'request' => [
-            'cookieValidationKey' => 'bxn5EAI5Zhl0XbCUil9IcaT7zSfRWhq6',
+            'enableCookieValidation' => false, // Отключаем валидацию cookie, так как не используем cookie
+            'enableCsrfValidation' => false, // Отключаем CSRF-защиту, так как не используем cookie
             'parsers' => [
                 'application/json' => 'yii\web\JsonParser',
             ]
@@ -24,8 +25,9 @@ $config = [
         ],
         'user' => [
             'identityClass' => 'app\models\User', // Класс модели пользователя
-            'enableAutoLogin' => true,
-            'enableSession' => false,
+            'enableAutoLogin' => false, // Отключаем автоматический логин через cookie
+            'enableSession' => false, // Отключаем использование сессий для хранения состояния пользователя
+            'loginUrl' => null, // Опционально, если хотите отключить редирект на страницу логина
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
@@ -44,13 +46,20 @@ $config = [
             ],
         ],
         'db' => $db,
+        'authManager' => [
+            'class' => 'yii\rbac\DbManager', // Использование DbManager для хранения данных RBAC в базе данных
+            'itemTable' => 'auth_roles', // новое имя таблицы для ролей и разрешений
+            'itemChildTable' => 'auth_item_childs', // новое имя таблицы для связей ролей и разрешений
+            'assignmentTable' => 'auth_assignments', // новое имя таблицы для назначений ролей пользователям
+            'ruleTable' => 'auth_rules', // новое имя таблицы для правил
+        ],
         'urlManager' => [
             'enablePrettyUrl' => true,
             'enableStrictParsing' => true,
             'showScriptName' => false,
             'rules' => [
                 'POST login' => 'user/login',
-                'POST logout' => 'user/logout',
+                'GET logout' => 'user/logout',
                 'POST register' => 'user/register',
                 'GET profile' => 'user/profile',
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'user'],

@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use Lcobucci\JWT\Parser;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\web\IdentityInterface;
@@ -14,11 +15,9 @@ use yii\web\IdentityInterface;
  * @property string $password
  * @property string $name
  * @property string $surname
- * @property int $role_id
  * @property string|null $created_at
  * @property string|null $updated_at
  *
- * @property Role $role
  */
 class User extends \yii\db\ActiveRecord implements IdentityInterface
 {
@@ -36,13 +35,11 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     public function rules()
     {
         return [
-            [['login', 'password', 'name', 'surname', 'role_id'], 'required'],
-            [['role_id'], 'integer'],
+            [['login', 'password', 'name', 'surname'], 'required'],
             [['created_at', 'updated_at'], 'safe'],
             [['login', 'name', 'surname'], 'string', 'max' => 50],
             [['password'], 'string', 'max' => 255],
             [['login'], 'unique'],
-            [['role_id'], 'exist', 'skipOnError' => true, 'targetClass' => Role::class, 'targetAttribute' => ['role_id' => 'id']],
         ];
     }
 
@@ -57,7 +54,6 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
             'password' => 'Password',
             'name' => 'Name',
             'surname' => 'Surname',
-            'role_id' => 'Role ID',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
@@ -68,10 +64,6 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
      *
      * @return ActiveQuery
      */
-    public function getRole()
-    {
-        return $this->hasOne(Role::class, ['id' => 'role_id']);
-    }
 
     public static function findIdentity($id)
     {
@@ -79,7 +71,9 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     }
     public static function findIdentityByAccessToken($token, $type = null)
     {
-        return null;
+        $parsedToken = (new Parser())->parse((string) $token);
+        $user_id = $parsedToken->getClaim('user_id');
+        return static::findOne($user_id);
     }
 
     public static function findByUsername($username)

@@ -39,20 +39,19 @@ class TokenFilter extends ActionFilter
                 if (!$parsedToken->validate($data)) {
                     throw new UnauthorizedHttpException('Token validation failed');
                 }
-
-                if ($parsedToken->isExpired()) {
-                    $user_id = $parsedToken->getClaim('user_id');
-                    $user = User::findOne($user_id);
-
-                    if ($user) {
-                        $ipAddress = Yii::$app->request->userIP;
-                        $userAgent = Yii::$app->request->userAgent;
+                $user_id = $parsedToken->getClaim('user_id');
+                $user = User::findOne($user_id);
+                if ($user) {
+                    $ipAddress = Yii::$app->request->userIP;
+                    $userAgent = Yii::$app->request->userAgent;
+                    if ($parsedToken->isExpired()) {
                         $tokenGenerator = new TokenGenerator($user, $ipAddress, $userAgent);
                         $newToken = $tokenGenerator->refreshTokens();
                         if ($newToken) {
                             Yii::$app->response->headers->set('Authorization', 'Bearer ' . $newToken);
                         }
                     }
+                    Yii::$app->user->login($user);
                 }
             } catch (\Exception $e) {
                 throw new UnauthorizedHttpException($e->getMessage());

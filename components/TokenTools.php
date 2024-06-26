@@ -6,6 +6,7 @@ use app\models\UserRefreshTokens;
 use Lcobucci\JWT\Parser;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
 use Lcobucci\JWT\ValidationData;
+use Yii;
 
 class TokenTools
 {
@@ -37,10 +38,6 @@ class TokenTools
     public static function getUserId($token){
         $parsedToken = (new Parser())->parse((string) $token);
         return $parsedToken->getClaim('user_id');
-    }
-    public static function getRoleId($token){
-        $parsedToken = (new Parser())->parse((string) $token);
-        return $parsedToken->getClaim('role_id');
     }
     public static function clearRefreshToken($userId, $user_agent, $ip_address)
     {

@@ -26,6 +26,13 @@ $config = [
             ],
         ],
         'db' => $db,
+        'authManager' => [
+            'class' => 'yii\rbac\DbManager', // Использование DbManager для хранения данных RBAC в базе данных
+            'itemTable' => 'auth_roles', // новое имя таблицы для ролей и разрешений
+            'itemChildTable' => 'auth_item_childs', // новое имя таблицы для связей ролей и разрешений
+            'assignmentTable' => 'auth_assignments', // новое имя таблицы для назначений ролей пользователям
+            'ruleTable' => 'auth_rules', // новое имя таблицы для правил
+        ],
     ],
     'params' => $params,
     /*

@@ -6,16 +6,18 @@ namespace app\controllers;
 use app\components\Middleware\TokenFilter;
 use app\components\TokenGenerator;
 use app\components\TokenTools;
-use app\models\Role;
 use app\models\User;
 use Yii;
+use yii\filters\AccessControl;
+use yii\rest\ActiveController;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
-class UserController extends Controller
+class UserController extends ActiveController
 {
     public $enableCsrfValidation = false;
+    public $modelClass = 'app\models\User';
 
     public function behaviors()
     {
@@ -29,7 +31,23 @@ class UserController extends Controller
         ];
         $behaviors['tokenFilter'] = [
             'class' => TokenFilter::class,
-            'only' => ['profile', 'logout', 'update', 'delete'],
+            'except' => ['login', 'register'],
+        ];
+        $behaviors['access'] = [
+            'class' => AccessControl::class,
+            'except' => ['register', 'login'], // Доступ ко всем действиям, кроме 'register' и 'login'
+            'rules' => [
+                [
+                    'actions' => ['profile', 'logout'],
+                    'allow' => true,
+                    'roles' => ['user'], // Только для авторизованных пользователей
+                ],
+                [
+                    'actions' => ['update', 'delete', 'index', 'view', 'create'],
+                    'allow' => true,
+                    'roles' => ['admin'], // Только для пользователей с ролью 'admin'
+                ],
+            ],
         ];
 
         return $behaviors;
@@ -39,17 +57,25 @@ class UserController extends Controller
         $user = new User();
         $request = Yii::$app->request;
 
-        // Если указана роль пользователя, найдем ее ID
-        if ($request->post('role_name')) {
-            $role_id = Role::findOne(['name' => $request->post('role_name')])->id;
-            $user->role_id = $role_id;
-        }
-
         // Загружаем данные из POST-запроса в модель пользователя
         $user->load($request->post(), '');
 
         // Сохраняем пользователя в базе данных
         if ($user->save()) {
+            // Назначаем роль пользователю
+            $auth = Yii::$app->authManager;
+
+            // По умолчанию назначаем роль 'user'
+            $role = $auth->getRole('user');
+
+            // Если указана роль пользователя, найдем ее
+            if ($request->post('role_name')) {
+                $requestedRole = $auth->getRole($request->post('role_name'));
+                if ($requestedRole !== null) {
+                    $role = $requestedRole;
+                }
+            }
+            $auth->assign($role, $user->id);
             return ['message' => 'Registration successful', 'user' => $user];
         } else {
             return ['message' => 'Registration failed', 'errors' => $user->errors];
@@ -90,8 +116,7 @@ class UserController extends Controller
         } else {
             $token = null;
         }
-
-        if ($token !== null && Yii::$app->user->isGuest) {
+        if ($token !== null && !Yii::$app->user->isGuest) {
             $user_id = Yii::$app->user->identity->id;
             $request = Yii::$app->request;
             $ipAddress = $request->userIP;
@@ -117,38 +142,5 @@ class UserController extends Controller
             throw new NotFoundHttpException("User not found");
         }
         return $user;
-    }
-    public function actionUpdate($id)
-    {
-        $user = User::findOne($id);
-        if ($user) {
-            $user->load(Yii::$app->request->getBodyParams(), ''); // Загружаем данные из PUT-запроса в модель пользователя
-            if ($user->save()) {
-                return $user; // Возвращаем обновленные данные пользователя
-            } else {
-                return ['error' => $user->errors]; // Возвращаем ошибку сохранения, если есть ошибки валидации
-            }
-        } else {
-            throw new NotFoundHttpException("User not found with id: $id"); // Возвращаем ошибку, если пользователь не найден
-        }
-    }
-
-    /**
-     * Действие для удаления пользователя.
-     * Пример запроса: DELETE /user/delete/{id}
-     * Удаляет пользователя по его ID и возвращает сообщение об успешном удалении.
-     */
-    public function actionDelete($id)
-    {
-        // Находим пользователя по его ID
-        $user = User::findOne($id);
-
-        // Проверяем, найден ли пользователь
-        if ($user) {
-            $user->delete(); // Удаляем пользователя
-            return ['message' => 'User deleted successfully']; // Возвращаем сообщение об успешном удалении
-        } else {
-            throw new NotFoundHttpException("User not found with id: $id"); // Возвращаем ошибку, если пользователь не найден
-        }
     }
 }

@@ -63,7 +63,6 @@ class TokenGenerator
             ->setIssuedAt(time())
             ->setExpiration(time() + $params['jwt']['access_expire'])
             ->set('user_id', $this->user->id)
-            ->set('role_id', $this->user->role_id)
             ->sign($signer, Yii::$app->params['jwt']['key'])
             ->getToken();
 
