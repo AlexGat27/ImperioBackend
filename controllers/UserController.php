@@ -35,7 +35,7 @@ class UserController extends ActiveController
         ];
         $behaviors['access'] = [
             'class' => AccessControl::class,
-            'except' => ['register', 'login'], // Доступ ко всем действиям, кроме 'register' и 'login'
+            'except' => ['login'],
             'rules' => [
                 [
                     'actions' => ['profile', 'logout'],
@@ -52,7 +52,7 @@ class UserController extends ActiveController
 
         return $behaviors;
     }
-    public function actionRegister()
+    public function actionCreate()
     {
         $user = new User();
         $request = Yii::$app->request;
