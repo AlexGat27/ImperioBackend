@@ -31,7 +31,7 @@ class UserController extends ActiveController
         ];
         $behaviors['tokenFilter'] = [
             'class' => TokenFilter::class,
-            'except' => ['login', 'register'],
+            'except' => ['login', 'create'],
         ];
         $behaviors['access'] = [
             'class' => AccessControl::class,
@@ -40,7 +40,7 @@ class UserController extends ActiveController
                 [
                     'actions' => ['profile', 'logout'],
                     'allow' => true,
-                    'roles' => ['user'], // Только для авторизованных пользователей
+                    'roles' => ['user'],
                 ],
                 [
                     'actions' => ['update', 'delete', 'index', 'view', 'create'],
@@ -59,6 +59,7 @@ class UserController extends ActiveController
 
         // Загружаем данные из POST-запроса в модель пользователя
         $user->load($request->post(), '');
+        $user->login = $request->post('login');
 
         // Сохраняем пользователя в базе данных
         if ($user->save()) {

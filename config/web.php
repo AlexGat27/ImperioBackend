@@ -1,5 +1,7 @@
 <?php
 
+use yii\filters\Cors;
+
 $params = require __DIR__ . '/params.php';
 $db = require __DIR__ . '/db.php';
 
@@ -25,9 +27,8 @@ $config = [
         ],
         'user' => [
             'identityClass' => 'app\models\User', // Класс модели пользователя
-            'enableAutoLogin' => false, // Отключаем автоматический логин через cookie
-            'enableSession' => false, // Отключаем использование сессий для хранения состояния пользователя
-            'loginUrl' => null, // Опционально, если хотите отключить редирект на страницу логина
+            'enableAutoLogin' => true, // Отключаем автоматический логин через cookie
+            'enableSession' => true, // Отключаем использование сессий для хранения состояния пользователя
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
@@ -58,18 +59,30 @@ $config = [
             'enableStrictParsing' => true,
             'showScriptName' => false,
             'rules' => [
-                'POST login' => 'user/login',
-                'GET logout' => 'user/logout',
-                'POST register' => 'user/register',
-                'GET profile' => 'user/profile',
-                ['class' => 'yii\rest\UrlRule', 'controller' => 'user'],
+                'POST api/v1/login' => 'user/login',
+                'GET api/v1/logout' => 'user/logout',
+                'GET api/v1/users/profile' => 'user/profile',
+                'POST api/v1/users/create' => 'user/create',
+                'POST api/v1/users/update' => 'user/update',
+                'POST api/v1/users/delete' => 'user/delete',
             ],
         ],
         'jwt' => [
             'class' => \Lcobucci\JWT\Signer\Hmac\Sha256::class,
             'key' => 'Imperio-Secret-Key', // Замените на ваш секретный ключ
         ],
+        'session' => [
+            'class' => 'yii\web\Session',
+            'savePath' => '@runtime/sessions',
+            'useCookies' => true,
+            'cookieParams' => [
+                'httpOnly' => false,
+                'secure' => false,
+                'sameSite' => \yii\web\Cookie::SAME_SITE_NONE,
+            ],
+        ],
     ],
+
     'params' => $params,
 ];
 
