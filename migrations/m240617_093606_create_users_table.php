@@ -22,15 +22,6 @@ class m240617_093606_create_users_table extends Migration
             'created_at' => $this->dateTime()->notNull()->defaultExpression('CURRENT_TIMESTAMP'),
             'updated_at' => $this->dateTime()->notNull()->defaultExpression('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'),
         ]);
-        $this->addForeignKey(
-            'roleid',
-            '{{%users}}',
-            'role_id',
-            '{{%roles}}',
-            'id',
-            'CASCADE',
-            'CASCADE'
-        );
     }
 
     /**
@@ -38,7 +29,6 @@ class m240617_093606_create_users_table extends Migration
      */
     public function safeDown()
     {
-        $this->dropForeignKey('fk_users_idrole', '{{%users}}');
         $this->dropTable('{{%users}}');
     }
 }
