@@ -61,10 +61,11 @@ $config = [
             'rules' => [
                 'POST api/v1/login' => 'user/login',
                 'GET api/v1/logout' => 'user/logout',
-                'GET api/v1/users/profile' => 'user/profile',
-                'POST api/v1/users/create' => 'user/create',
-                'POST api/v1/users/update' => 'user/update',
-                'POST api/v1/users/delete' => 'user/delete',
+                'GET api/v1/profile' => 'user/profile',
+
+                'POST api/v1/users/create' => 'user/register',
+                'POST api/v1/users/update/<id:\d+>' => 'user/updateUser',
+                'POST api/v1/users/delete/<id:\d+>' => 'user/deleteUser',
             ],
         ],
         'jwt' => [

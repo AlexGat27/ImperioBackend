@@ -18,10 +18,15 @@ class m240617_093606_create_users_table extends Migration
             'password' => $this->string(50)->notNull(),
             'name' => $this->string(50)->notNull(),
             'surname' => $this->string(50)->notNull(),
-            'role_id' => $this->integer()->notNull(),
             'created_at' => $this->dateTime()->notNull()->defaultExpression('CURRENT_TIMESTAMP'),
             'updated_at' => $this->dateTime()->notNull()->defaultExpression('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'),
         ]);
+        $this->createIndex(
+            'idx-unique-login',
+            '{{%users}}',
+            'login',
+            true
+        );
     }
 
     /**
@@ -29,6 +34,7 @@ class m240617_093606_create_users_table extends Migration
      */
     public function safeDown()
     {
+        $this->dropIndex('idx-unique-login', '{{%users}}');
         $this->dropTable('{{%users}}');
     }
 }

@@ -43,4 +43,10 @@ class TokenTools
     {
         UserRefreshTokens::deleteAll(['user_id' => $userId, 'user_agent' => $user_agent, 'ip' => $ip_address]);
     }
+    public static function clearRefreshTokens($userId)
+    {
+        UserRefreshTokens::deleteAll([
+            'user_id' => $userId,
+        ]);
+    }
 }

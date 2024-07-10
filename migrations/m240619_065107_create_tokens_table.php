@@ -30,6 +30,8 @@ class m240619_065107_create_tokens_table extends Migration
             'CASCADE',
             'CASCADE'
         );
+        $this->createIndex('idx-user_refresh_tokens-token', '{{%user_refresh_tokens}}', 'token(255)', true);
+        $this->createIndex('idx-user_refresh_tokens-user_id', '{{%user_refresh_tokens}}', 'user_id', true);
     }
 
 
@@ -38,7 +40,8 @@ class m240619_065107_create_tokens_table extends Migration
      */
     public function safeDown()
     {
-
+        $this->dropIndex('idx-user_refresh_tokens-user_id', '{{%user_refresh_tokens}}');
+        $this->dropIndex('idx-user_refresh_tokens-token', '{{%user_refresh_tokens}}');
         $this->dropForeignKey('fk-user_refresh_tokens-user_id', '{{%user_refresh_tokens}}');
         // Удаление таблицы
         $this->dropTable('{{%user_refresh_tokens}}');

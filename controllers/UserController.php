@@ -16,9 +16,7 @@ use yii\web\Response;
 
 class UserController extends ActiveController
 {
-    public $enableCsrfValidation = false;
     public $modelClass = 'app\models\User';
-
     public function behaviors()
     {
         $behaviors = parent::behaviors();
@@ -31,7 +29,7 @@ class UserController extends ActiveController
         ];
         $behaviors['tokenFilter'] = [
             'class' => TokenFilter::class,
-            'except' => ['login', 'create'],
+            'except' => ['login'],
         ];
         $behaviors['access'] = [
             'class' => AccessControl::class,
@@ -43,7 +41,6 @@ class UserController extends ActiveController
                     'roles' => ['user'],
                 ],
                 [
-                    'actions' => ['update', 'delete', 'index', 'view', 'create'],
                     'allow' => true,
                     'roles' => ['admin'], // Только для пользователей с ролью 'admin'
                 ],
@@ -52,7 +49,7 @@ class UserController extends ActiveController
 
         return $behaviors;
     }
-    public function actionCreate()
+    public function actionRegister()
     {
         $user = new User();
         $request = Yii::$app->request;
@@ -98,6 +95,7 @@ class UserController extends ActiveController
         if ($user && $user->validatePassword($password)) {
             $tokenGenerator = new TokenGenerator($user, $ipAddress, $userAgent);
             $newToken = $tokenGenerator->generateTokens();
+
             if ($newToken) {
                 Yii::$app->user->login($user);
                 Yii::$app->response->headers->set('Authorization', 'Bearer ' . $newToken);
@@ -143,5 +141,42 @@ class UserController extends ActiveController
             throw new NotFoundHttpException("User not found");
         }
         return $user;
+    }
+
+    public function actionUpdateUser($id)
+    {
+        $user = User::findOne($id);
+        if (!$user) {
+            throw new NotFoundHttpException("User not found");
+        }
+
+        $request = Yii::$app->request;
+        $user->load($request->getBodyParams(), '');
+
+        if ($user->save()) {
+            if (isset($request["role_name"])){
+                $auth = Yii::$app->authManager;
+                $role = $auth->getRole($request["role_name"]);
+                Yii::$app->authManager->assign($role, $user->id);
+            }
+            return ['message' => 'User updated successfully', 'user' => $user];
+        } else {
+            return ['message' => 'Failed to update user', 'errors' => $user->errors];
+        }
+    }
+
+    public function actionDeleteUser($id)
+    {
+        $user = User::findOne($id);
+        if (!$user) {
+            throw new NotFoundHttpException("User not found");
+        }
+
+        if ($user->delete()) {
+            TokenTools::clearRefreshTokens($id);
+            return ['message' => 'User deleted successfully'];
+        } else {
+            return ['message' => 'Failed to delete user'];
+        }
     }
 }

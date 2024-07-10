@@ -101,6 +101,11 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     {
         return Yii::$app->security->validatePassword($password, $this->password);
     }
+    public function getRoles()
+    {
+        return $this->hasMany(Role::class, ['name' => 'item_name'])
+            ->viaTable('auth_assignments', ['user_id' => 'id']);
+    }
 
     public function beforeSave($insert)
     {

@@ -31,4 +31,9 @@ class AuthRole extends ActiveRecord
             'description' => 'Description',
         ];
     }
+    public function getUsers()
+    {
+        return $this->hasMany(User::class, ['id' => 'user_id'])
+            ->viaTable('auth_assignments', ['item_name' => 'name']);
+    }
 }

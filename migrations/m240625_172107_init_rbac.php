@@ -22,9 +22,6 @@ class m240625_172107_init_rbac extends Migration
         $user = $auth->createRole('user');
         $auth->add($user);
 
-        // Назначение роли пользователю
-        $auth->assign($admin, 1); // ID пользователя 1
-        $auth->assign($user, 2);  // ID пользователя 2
     }
 
     /**
