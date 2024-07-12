@@ -14,9 +14,8 @@ use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
-class UserController extends ActiveController
+class UserController extends Controller
 {
-    public $modelClass = 'app\models\User';
     public function behaviors()
     {
         $behaviors = parent::behaviors();
@@ -143,7 +142,7 @@ class UserController extends ActiveController
         return $user;
     }
 
-    public function actionUpdateUser($id)
+    public function actionUpdate($id)
     {
         $user = User::findOne($id);
         if (!$user) {
@@ -165,7 +164,7 @@ class UserController extends ActiveController
         }
     }
 
-    public function actionDeleteUser($id)
+    public function actionDelete($id)
     {
         $user = User::findOne($id);
         if (!$user) {

@@ -64,8 +64,19 @@ $config = [
                 'GET api/v1/profile' => 'user/profile',
 
                 'POST api/v1/users/create' => 'user/register',
-                'POST api/v1/users/update/<id:\d+>' => 'user/updateUser',
-                'POST api/v1/users/delete/<id:\d+>' => 'user/deleteUser',
+                'POST api/v1/users/update/<id:\d+>' => 'user/update',
+                'POST api/v1/users/delete/<id:\d+>' => 'user/delete',
+
+                'GET api/v1/manufactures' => 'manufacture/index',
+                'GET api/v1/manufactures/<id:\d+>' => 'manufacture/view',
+                'POST api/v1/manufactures' => 'manufacture/create',
+                'PUT api/v1/manufactures/<id:\d+>' => 'manufacture/update',
+                'DELETE api/v1/manufactures/<id:\d+>' => 'manufacture/delete',
+
+                'POST api/v1/manufacture-contacts' => 'manufacture-contact/create',
+                'GET api/v1/manufacture-contacts' => 'manufacture-contact/index',
+                'PUT api/v1/manufacture-contacts/<id:\d+>' => 'manufacture-contact/update',
+                'DELETE api/v1/manufacture-contacts/<id:\d+>' => 'manufacture-contact/delete'
             ],
         ],
         'jwt' => [
