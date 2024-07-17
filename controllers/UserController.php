@@ -9,10 +9,10 @@ use app\components\TokenTools;
 use app\models\User;
 use Yii;
 use yii\filters\AccessControl;
-use yii\rest\ActiveController;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
+use yii\web\UnauthorizedHttpException;
 
 class UserController extends Controller
 {
@@ -35,13 +35,13 @@ class UserController extends Controller
             'except' => ['login'],
             'rules' => [
                 [
-                    'actions' => ['profile', 'logout'],
                     'allow' => true,
-                    'roles' => ['user'],
+                    'roles' => ['users'],
                 ],
                 [
+                    'actions' => ['profile', 'logout', 'refresh-tokens'],
                     'allow' => true,
-                    'roles' => ['admin'], // Только для пользователей с ролью 'admin'
+                    'roles' => ['@'],
                 ],
             ],
         ];
@@ -172,10 +172,47 @@ class UserController extends Controller
         }
 
         if ($user->delete()) {
-            TokenTools::clearRefreshTokens($id);
+            TokenTools::clearRefreshToken();
             return ['message' => 'User deleted successfully'];
         } else {
             return ['message' => 'Failed to delete user'];
+        }
+    }
+
+    public function actionRefreshTokens()
+    {
+        $authHeader = Yii::$app->request->getHeaders()->get('Authorization');
+
+        if ($authHeader && preg_match('/^Bearer\s+(.*?)$/', $authHeader, $matches)) {
+            $token = $matches[1];
+            $userId = TokenTools::getUserId($token);
+            $ipAddress = Yii::$app->request->userIP;
+            $userAgent = Yii::$app->request->userAgent;
+            $user = User::findOne($userId);
+            if ($user) {
+                $tokenGenerator = new TokenGenerator($user, $ipAddress, $userAgent);
+                return ['access-token' => $tokenGenerator->refreshTokens()];
+            }
+        } else {
+            Yii::$app->response->statusCode = 401;
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            Yii::$app->response->data = [
+                'status' => 'error',
+                'message' => 'No token provided or invalid authorization header',
+            ];
+            return false;
+        }
+    }
+
+    public function actionGetRole($id){
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $auth = Yii::$app->authManager;
+        $roles = $auth->getRolesByUser($id);
+
+        if (!empty($roles)) {
+            return $roles;
+        } else {
+            return ['message' => 'No roles found for this user'];
         }
     }
 }

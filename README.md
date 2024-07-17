@@ -1,5 +1,129 @@
 # API Endpoints Documentation
 
+# UserController API
+
+## Authentication
+
+### POST `/api/v1/login`
+
+Authenticates a user based on username and password.
+
+**Request:**
+```json
+{
+  "login": "string",
+  "password": "string"
+}
+```
+
+**Response (success):**
+```json
+{
+  "access_token": "string"
+}
+```
+
+**Response (failure):**
+```json
+{
+  "message": "string"
+}
+```
+
+### GET `/api/v1/logout`
+
+Logs out the current user (invalidates the token).
+
+## User Management
+
+### POST `/api/v1/users/create`
+
+Registers a new user.
+
+**Request:**
+```json
+{
+  "username": "string",
+  "password": "string",
+  "role_name": "string" // optional
+}
+```
+
+**Response (success):**
+```json
+{
+  "message": "Registration successful",
+  "user": {
+    "id": "integer",
+    "username": "string",
+    "created_at": "string"
+  }
+}
+```
+
+**Response (failure):**
+```json
+{
+  "message": "Registration failed",
+  "errors": {
+    "field_name": ["error message"]
+  }
+}
+```
+
+### POST `/api/v1/users/update/<id>`
+
+Updates an existing user's information.
+
+**Request:**
+```json
+{
+  "username": "string",
+  "role_name": "string" // optional
+}
+```
+
+**Response (success):**
+```json
+{
+  "message": "User updated successfully",
+  "user": {
+    "id": "integer",
+    "username": "string",
+    "created_at": "string"
+  }
+}
+```
+
+**Response (failure):**
+```json
+{
+  "message": "Failed to update user",
+  "errors": {
+    "field_name": ["error message"]
+  }
+}
+```
+
+### POST `/api/v1/users/delete/<id>`
+
+Deletes a user by ID.
+
+**Response (success):**
+```json
+{
+  "message": "User deleted successfully"
+}
+```
+
+**Response (failure):**
+```json
+{
+  "message": "Failed to delete user"
+}
+```
+
+
 ## Manufacture Endpoints
 
 ### GET `api/v1/manufactures`

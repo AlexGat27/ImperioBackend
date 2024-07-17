@@ -2,16 +2,13 @@
 
 namespace app\controllers;
 
-use app\models\AuthRole;
 use Yii;
 use yii\filters\AccessControl;
-use yii\rest\ActiveController;
+use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 
-class RoleController extends ActiveController
+class RoleController extends Controller
 {
-    public $modelClass = AuthRole::class;
-
     public function behaviors()
     {
         return [
@@ -20,7 +17,7 @@ class RoleController extends ActiveController
                 'rules' => [
                     [
                         'allow' => true,
-                        'roles' => ['admin'], // Только для пользователей с ролью 'admin'
+                        'roles' => ['roles'],
                     ],
                 ],
             ],
@@ -29,44 +26,85 @@ class RoleController extends ActiveController
 
     public function actionIndex()
     {
-        $roles = AuthRole::find()->all();
-        return $roles;
+        $auth = Yii::$app->authManager;
+        $roles = $auth->getRoles();
+        $rolesWithChildren = [];
+        foreach ($roles as $role) {
+            $children = $auth->getChildren($role->name);
+            $rolesWithChildren[] = [
+                'role' => $role,
+                'children' => $children,
+            ];
+        }
+
+        return $rolesWithChildren;
     }
 
     public function actionView($name)
     {
-        if (($role = AuthRole::findOne($name)) !== null) {
-            return $role;
+        $auth = Yii::$app->authManager;
+        $role = $auth->getRole($name);
+
+        if ($role !== null) {
+            return [
+                'role' => $role,
+                'children' => $auth->getChildren($role->name),
+            ];
         }
 
-        throw new NotFoundHttpException('Not found role');
+        throw new NotFoundHttpException('Role not found');
     }
 
     public function actionCreate()
     {
-        $role = new AuthRole();
+        $auth = Yii::$app->authManager;
+        $roleName = Yii::$app->request->post("role_name");
 
-        if ($role->load(Yii::$app->request->post()) && $role->save()) {
-            return $role;
+        if ($roleName && !$auth->getRole($roleName)) {
+            $role = $auth->createRole($roleName);
+            $role->description = Yii::$app->request->post("description");
+            $auth->add($role);
+
+            $children = Yii::$app->request->post("children", []);
+            foreach ($children as $childRoleName) {
+                $childRole = $auth->getRole($childRoleName);
+                if ($childRole) {
+                    $auth->addChild($role, $childRole);
+                }
+            }
+            return [
+                'role' => $role,
+                'children' => $children,
+            ];
         }
 
-        return ["message" => "Cannot create role."];
+        return ["message" => "Cannot create role. Role name already exists or invalid."];
     }
 
     public function actionUpdate($name)
     {
-        $role = $this->findModel($name);
+        $auth = Yii::$app->authManager;
+        $role = $auth->getRole($name);
 
-        if ($role->load(Yii::$app->request->post()) && $role->save()) {
+        if ($role) {
+            $role->description = Yii::$app->request->post("description");
+            $auth->update($name, $role);
             return $role;
         }
 
-        return ["message" => "Cannot update role."];
+        return ["message" => "Cannot update role. Role not found."];
     }
 
     public function actionDelete($name)
     {
-        $this->findModel($name)->delete();
-        return ["message" => "Successfully deleted role"];
+        $auth = Yii::$app->authManager;
+        $role = $auth->getRole($name);
+
+        if ($role) {
+            $auth->remove($role);
+            return ["message" => "Successfully deleted role"];
+        }
+
+        return ["message" => "Role not found"];
     }
 }

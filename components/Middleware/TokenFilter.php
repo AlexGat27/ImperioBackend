@@ -9,6 +9,7 @@ use Lcobucci\JWT\Signer\Hmac\Sha256;
 use Lcobucci\JWT\ValidationData;
 use Yii;
 use yii\base\ActionFilter;
+use yii\web\Response;
 use yii\web\UnauthorizedHttpException;
 
 class TokenFilter extends ActionFilter
@@ -27,7 +28,7 @@ class TokenFilter extends ActionFilter
 
                 // Проверка подписи токена
                 if (!$parsedToken->verify($signer, $key)) {
-                    throw new UnauthorizedHttpException('Invalid token signature');
+                    return $this->unauthorizedResponse('Invalid token signature');
                 }
 
                 // Проверка срока действия токена
@@ -37,29 +38,35 @@ class TokenFilter extends ActionFilter
                 $data->setId(Yii::$app->params['jwt']['id']);
 
                 if (!$parsedToken->validate($data)) {
-                    throw new UnauthorizedHttpException('Token validation failed');
+                    return $this->unauthorizedResponse('Token validation failed');
                 }
                 $user_id = $parsedToken->getClaim('user_id');
                 $user = User::findOne($user_id);
                 if ($user) {
-                    $ipAddress = Yii::$app->request->userIP;
-                    $userAgent = Yii::$app->request->userAgent;
                     if ($parsedToken->isExpired()) {
-                        $tokenGenerator = new TokenGenerator($user, $ipAddress, $userAgent);
-                        $newToken = $tokenGenerator->refreshTokens();
-                        if ($newToken) {
-                            Yii::$app->response->headers->set('Authorization', 'Bearer ' . $newToken);
-                        }
+                        return $this->unauthorizedResponse('Token expired');
                     }
                     Yii::$app->user->login($user);
                 }
             } catch (\Exception $e) {
-                throw new UnauthorizedHttpException($e->getMessage());
+                return $this->unauthorizedResponse($e->getMessage());
             }
         } else {
-            throw new UnauthorizedHttpException('No token provided');
+            return $this->unauthorizedResponse('No token provided');
         }
 
         return parent::beforeAction($action);
+    }
+
+    protected function unauthorizedResponse($message)
+    {
+        Yii::$app->response->statusCode = 401;
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        Yii::$app->response->data = [
+            'status' => 'error',
+            'message' => $message,
+        ];
+
+        return false;
     }
 }

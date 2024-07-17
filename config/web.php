@@ -62,10 +62,18 @@ $config = [
                 'POST api/v1/login' => 'user/login',
                 'GET api/v1/logout' => 'user/logout',
                 'GET api/v1/profile' => 'user/profile',
+                'GET api/v1/refresh-tokens' => 'user/refresh-tokens',
 
                 'POST api/v1/users/create' => 'user/register',
                 'POST api/v1/users/update/<id:\d+>' => 'user/update',
                 'POST api/v1/users/delete/<id:\d+>' => 'user/delete',
+                'GET api/v1/users/<id:\d+>/get-role' => 'user/get-role',
+
+                'GET api/v1/roles' => 'role/index',
+                'GET api/v1/roles/view' => 'role/view',
+                'POST api/v1/roles' => 'role/create',
+                'PUT api/v1/roles' => 'role/update',
+                'DELETE api/v1/roles' => 'role/delete',
 
                 'GET api/v1/manufactures' => 'manufacture/index',
                 'GET api/v1/manufactures/<id:\d+>' => 'manufacture/view',

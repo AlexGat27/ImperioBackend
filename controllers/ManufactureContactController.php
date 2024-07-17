@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\Manufacture;
+use yii\filters\AccessControl;
 use yii\rest\Controller;
 use app\models\ManufactureContact;
 use Yii;
@@ -10,6 +11,20 @@ use yii\web\NotFoundHttpException;
 
 class ManufactureContactController extends Controller
 {
+    public function behaviors()
+    {
+        return [
+            'access' => [
+                'class' => AccessControl::class,
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'roles' => ['manufactures'],
+                    ],
+                ],
+            ],
+        ];
+    }
     public function actionIndex()
     {
         return ManufactureContact::find()->all();

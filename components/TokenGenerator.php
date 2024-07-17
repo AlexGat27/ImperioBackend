@@ -3,7 +3,6 @@
 namespace app\components;
 
 use app\models\User;
-use app\models\UserRefreshTokens;
 use Yii;
 use yii\web\UnauthorizedHttpException;
 use Lcobucci\JWT\Builder;
@@ -36,19 +35,22 @@ class TokenGenerator
             return false;
         }
     }
+
     public function refreshTokens()
     {
-        $model = UserRefreshTokens::findOne(['user_id' => $this->user->id, 'user_agent' => $this->user_agent, 'ip' => $this->ip_address]);
-        if (!$model) {
-            throw new UnauthorizedHttpException('Refresh token not found');
-        }
-        $refreshToken = (string) $model->token;
+        $refreshToken = Yii::$app->request->cookies->getValue('refreshToken');
 
-        if (!TokenTools::validateToken($refreshToken)) {
+        if (!$refreshToken) {
+            Yii::$app->response->statusCode = 401;
+            return ['status' => 'error', 'message' => 'Refresh token not found'];
+        }
+
+        if (TokenTools::validateToken($refreshToken)) {
             return $this->generateTokens();
         }
 
-        return false;
+        Yii::$app->response->statusCode = 401;
+        return ['status' => 'error', 'message' => 'Invalid or expired refresh token'];
     }
 
     private function generateAccessToken($params)
@@ -88,19 +90,16 @@ class TokenGenerator
 
     private function saveRefreshToken($tokenString, $expiration_time)
     {
-        $model = UserRefreshTokens::findOne(['user_id' => $this->user->id, 'user_agent' => $this->user_agent, 'ip' => $this->ip_address]);
-        if (!$model) {
-            $model = new UserRefreshTokens();
-        }
-        $model->user_id = $this->user->id;
-        $model->token = (string) $tokenString;
-        $model->ip = $this->ip_address;
-        $model->user_agent = $this->user_agent;
+        $cookie = new \yii\web\Cookie([
+            'name' => 'refreshToken',
+            'value' => (string) $tokenString,
+            'expire' => time() + $expiration_time,
+            'httpOnly' => true, // С помощью этого параметра обеспечивается доступ к cookie только через HTTP протокол
+            'secure' => true, // Используйте secure flag для безопасности (если используете HTTPS)
+        ]);
 
-        $expirationDate = new \DateTime();
-        $expirationDate->setTimestamp(time() + $expiration_time);
-        $model->expiration_date = $expirationDate->format('Y-m-d H:i:s');
+        Yii::$app->response->cookies->add($cookie);
 
-        return $model->save();
+        return true;
     }
 }

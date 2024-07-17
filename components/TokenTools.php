@@ -39,14 +39,9 @@ class TokenTools
         $parsedToken = (new Parser())->parse((string) $token);
         return $parsedToken->getClaim('user_id');
     }
-    public static function clearRefreshToken($userId, $user_agent, $ip_address)
+    public static function clearRefreshToken()
     {
-        UserRefreshTokens::deleteAll(['user_id' => $userId, 'user_agent' => $user_agent, 'ip' => $ip_address]);
-    }
-    public static function clearRefreshTokens($userId)
-    {
-        UserRefreshTokens::deleteAll([
-            'user_id' => $userId,
-        ]);
+        $cookies = Yii::$app->response->cookies;
+        $cookies->remove('refreshToken');
     }
 }

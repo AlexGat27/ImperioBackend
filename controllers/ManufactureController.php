@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\ManufactureForm;
+use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\rest\Controller;
 use app\models\Manufacture;
@@ -13,6 +14,20 @@ use yii\web\NotFoundHttpException;
 
 class ManufactureController extends Controller
 {
+    public function behaviors()
+    {
+        return [
+            'access' => [
+                'class' => AccessControl::class,
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'roles' => ['manufactures'],
+                    ],
+                ],
+            ],
+        ];
+    }
     public function actionIndex()
     {
         $manufactures = Manufacture::find()->all();
