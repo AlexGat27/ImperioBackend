@@ -28,7 +28,7 @@ class UserController extends Controller
         ];
         $behaviors['tokenFilter'] = [
             'class' => TokenFilter::class,
-            'except' => ['login'],
+            'except' => ['login', 'refresh-tokens'],
         ];
         $behaviors['access'] = [
             'class' => AccessControl::class,
@@ -48,6 +48,21 @@ class UserController extends Controller
 
         return $behaviors;
     }
+    public function actionIndex()  {
+        $users = User::find()->orderBy('id')->all();
+        $usersWithRoles = [];
+        foreach($users as $user) {
+            $auth = Yii::$app->authManager;
+            $roles = $auth->getRolesByUser($user->id);
+            $rolesKeys = array_keys($roles);
+            $usersWithRoles[] = [
+                ...$user,
+                "roles" => $rolesKeys,
+            ];
+        }
+        return $usersWithRoles;
+    }
+
     public function actionRegister()
     {
         $user = new User();
@@ -144,7 +159,7 @@ class UserController extends Controller
 
     public function actionUpdate($id)
     {
-        $user = User::findOne($id);
+        $user = User::findIdentity($id);
         if (!$user) {
             throw new NotFoundHttpException("User not found");
         }
@@ -153,15 +168,19 @@ class UserController extends Controller
         $user->load($request->getBodyParams(), '');
 
         if ($user->save()) {
-            if (isset($request["role_name"])){
+            if (null !== $request->post("roles")){
                 $auth = Yii::$app->authManager;
-                $role = $auth->getRole($request["role_name"]);
-                Yii::$app->authManager->assign($role, $user->id);
+                $auth->revokeAll($user->id);
+                foreach ($request->post("roles") as $role_name) {
+                    $role = $auth->getRole($role_name);
+                    $auth->assign($role, $user->id);
+                }
             }
             return ['message' => 'User updated successfully', 'user' => $user];
         } else {
             return ['message' => 'Failed to update user', 'errors' => $user->errors];
         }
+
     }
 
     public function actionDelete($id)
@@ -181,17 +200,16 @@ class UserController extends Controller
 
     public function actionRefreshTokens()
     {
-        $authHeader = Yii::$app->request->getHeaders()->get('Authorization');
+        $token = Yii::$app->request->cookies->get('refreshToken');
 
-        if ($authHeader && preg_match('/^Bearer\s+(.*?)$/', $authHeader, $matches)) {
-            $token = $matches[1];
+        if ($token) {
             $userId = TokenTools::getUserId($token);
             $ipAddress = Yii::$app->request->userIP;
             $userAgent = Yii::$app->request->userAgent;
             $user = User::findOne($userId);
             if ($user) {
                 $tokenGenerator = new TokenGenerator($user, $ipAddress, $userAgent);
-                return ['access-token' => $tokenGenerator->refreshTokens()];
+                return ['access_token' => $tokenGenerator->refreshTokens()];
             }
         } else {
             Yii::$app->response->statusCode = 401;

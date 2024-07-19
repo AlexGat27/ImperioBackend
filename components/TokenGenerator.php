@@ -82,6 +82,7 @@ class TokenGenerator
             ->setId($params['jwt']['id'], true)
             ->setIssuedAt(time())
             ->setExpiration(time() + $params['jwt']['refresh_expire'])
+            ->set('user_id', $this->user->id)
             ->sign($signer, Yii::$app->params['jwt']['key'])
             ->getToken();
 
@@ -95,7 +96,7 @@ class TokenGenerator
             'value' => (string) $tokenString,
             'expire' => time() + $expiration_time,
             'httpOnly' => true, // С помощью этого параметра обеспечивается доступ к cookie только через HTTP протокол
-            'secure' => true, // Используйте secure flag для безопасности (если используете HTTPS)
+            'secure' => false, // Используйте secure flag для безопасности (если используете HTTPS)
         ]);
 
         Yii::$app->response->cookies->add($cookie);

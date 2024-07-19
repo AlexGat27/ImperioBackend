@@ -64,6 +64,7 @@ $config = [
                 'GET api/v1/profile' => 'user/profile',
                 'GET api/v1/refresh-tokens' => 'user/refresh-tokens',
 
+                'GET api/v1/users' => 'user/index',
                 'POST api/v1/users/create' => 'user/register',
                 'POST api/v1/users/update/<id:\d+>' => 'user/update',
                 'POST api/v1/users/delete/<id:\d+>' => 'user/delete',
@@ -98,7 +99,7 @@ $config = [
             'cookieParams' => [
                 'httpOnly' => false,
                 'secure' => false,
-                'sameSite' => \yii\web\Cookie::SAME_SITE_NONE,
+                'sameSite' => \yii\web\Cookie::SAME_SITE_LAX,
             ],
         ],
     ],
