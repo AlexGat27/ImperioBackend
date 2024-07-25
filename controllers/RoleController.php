@@ -2,26 +2,39 @@
 
 namespace app\controllers;
 
+use app\components\Middleware\TokenFilter;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\web\Response;
 
 class RoleController extends Controller
 {
     public function behaviors()
     {
-        return [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'allow' => true,
-                        'roles' => ['roles'],
-                    ],
+        $behaviors = parent::behaviors();
+
+        $behaviors['contentNegotiator'] = [
+            'class' => \yii\filters\ContentNegotiator::class,
+            'formats' => [
+                'application/json' => Response::FORMAT_JSON,
+            ],
+        ];
+        $behaviors['tokenFilter'] = [
+            'class' => TokenFilter::class,
+        ];
+        $behaviors['access'] = [
+            'class' => AccessControl::class,
+            'rules' => [
+                [
+                    'allow' => true,
+                    'roles' => ['roles'],
                 ],
             ],
         ];
+
+        return $behaviors;
     }
 
     public function actionIndex()

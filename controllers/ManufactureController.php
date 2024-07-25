@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\components\Middleware\TokenFilter;
 use app\models\ManufactureForm;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
@@ -11,22 +12,34 @@ use app\models\ManufactureEmail;
 use app\models\ManufactureContact;
 use Yii;
 use yii\web\NotFoundHttpException;
+use yii\web\Response;
 
 class ManufactureController extends Controller
 {
     public function behaviors()
     {
-        return [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'allow' => true,
-                        'roles' => ['manufactures'],
-                    ],
+        $behaviors = parent::behaviors();
+
+        $behaviors['contentNegotiator'] = [
+            'class' => \yii\filters\ContentNegotiator::class,
+            'formats' => [
+                'application/json' => Response::FORMAT_JSON,
+            ],
+        ];
+        $behaviors['tokenFilter'] = [
+            'class' => TokenFilter::class,
+        ];
+        $behaviors['access'] = [
+            'class' => AccessControl::class,
+            'rules' => [
+                [
+                    'allow' => true,
+                    'roles' => ['manufactures'],
                 ],
             ],
         ];
+
+        return $behaviors;
     }
     public function actionIndex()
     {
