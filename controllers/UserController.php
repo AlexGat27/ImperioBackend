@@ -192,6 +192,8 @@ class UserController extends Controller
 
         if ($user->delete()) {
             TokenTools::clearRefreshToken();
+            $auth = Yii::$app->authManager;
+            $auth->revokeAll($user->id);
             return ['message' => 'User deleted successfully'];
         } else {
             return ['message' => 'Failed to delete user'];
