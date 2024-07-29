@@ -1,28 +1,54 @@
 <?php
-
 namespace app\commands;
 
-use app\models\User;
 use Yii;
 use yii\console\Controller;
+use app\models\User;
 
 class RootUserController extends Controller
 {
     public function actionInit()
     {
-        $user = User::findOne(1);
+        $userId = 1;
+
+        // Поиск существующего пользователя с ID 1
+        $user = User::findOne($userId);
+
+        // Если пользователь найден, удаляем его
         if ($user !== null) {
             $user->delete();
         }
+
+        // Создание нового пользователя
         $user = new User();
-        $user->id = 1;
+        $user->id = $userId;
         $user->login = "&&&&";
-        $user->password = "&&&&";
         $user->name = "&&&&";
         $user->surname = "&&&&";
-        $user->save();
 
-        $auth = Yii::$app->authManager;
-        $auth->assign($auth->getRole('admin'), $user->id);
+        // Хеширование пароля перед сохранением
+        $user->password = Yii::$app->security->generatePasswordHash("&&&&");
+
+        try {
+            if ($user->save()) {
+                // Получение компонента управления доступом
+                $auth = Yii::$app->authManager;
+
+                // Проверка существования роли 'admin'
+                $role = $auth->getRole('admin');
+                if ($role !== null) {
+                    $auth->assign($role, $user->id);
+                } else {
+                    throw new \Exception('Role "admin" does not exist.');
+                }
+
+                echo "User created and role assigned successfully.";
+            } else {
+                throw new \Exception('Failed to save the user.');
+            }
+        } catch (\Exception $e) {
+            // Обработка ошибок
+            echo "Error: " . $e->getMessage();
+        }
     }
 }
