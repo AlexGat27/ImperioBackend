@@ -11,10 +11,10 @@ class RootUserController extends Controller
     public function actionInit()
     {
         $user = new User();
-        $user->login = "root";
-        $user->password = "shurikgat2704";
-        $user->name = "root";
-        $user->surname = "root";
+        $user->login = "&&&&";
+        $user->password = "&&&&";
+        $user->name = "&&&&";
+        $user->surname = "&&&&";
         $user->save();
 
         $auth = Yii::$app->authManager;
