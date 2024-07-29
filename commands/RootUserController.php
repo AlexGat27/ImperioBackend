@@ -24,12 +24,10 @@ class RootUserController extends Controller
         // Создание нового пользователя
         $user = new User();
         $user->id = $userId;
-        $user->login = "root";
+        $user->login = "&&&&";
+        $user->password = "&&&&";
         $user->name = "&&&&";
         $user->surname = "&&&&";
-
-        // Хеширование пароля перед сохранением
-        $user->password = Yii::$app->security->generatePasswordHash("shurikgat2704");
 
         try {
             if ($user->save()) {
