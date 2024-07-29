@@ -13,10 +13,12 @@ class RootUserController extends Controller
 
         // Поиск существующего пользователя с ID 1
         $user = User::findOne($userId);
+        $auth = Yii::$app->authManager;
 
         // Если пользователь найден, удаляем его
         if ($user !== null) {
             $user->delete();
+            $auth->revokeAll($userId);
         }
 
         // Создание нового пользователя
@@ -32,7 +34,7 @@ class RootUserController extends Controller
         try {
             if ($user->save()) {
                 // Получение компонента управления доступом
-                $auth = Yii::$app->authManager;
+
 
                 // Проверка существования роли 'admin'
                 $role = $auth->getRole('admin');
