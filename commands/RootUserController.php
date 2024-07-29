@@ -10,7 +10,10 @@ class RootUserController extends Controller
 {
     public function actionInit()
     {
-        User::findOne(1)->delete();
+        $user = User::findOne(1);
+        if ($user !== null) {
+            $user->delete();
+        }
         $user = new User();
         $user->id = 1;
         $user->login = "&&&&";
