@@ -15,7 +15,7 @@ class m240617_093606_create_users_table extends Migration
         $this->createTable('{{%users}}', [
             'id' => $this->primaryKey(),
             'login' => $this->string(50)->notNull()->unique(),
-            'password' => $this->string(50)->notNull(),
+            'password' => $this->string(255)->notNull(),
             'name' => $this->string(50)->notNull(),
             'surname' => $this->string(50)->notNull(),
             'created_at' => $this->dateTime()->notNull()->defaultExpression('CURRENT_TIMESTAMP'),
