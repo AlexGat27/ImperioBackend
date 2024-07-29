@@ -85,7 +85,9 @@ $config = [
                 'POST api/v1/manufacture-contacts' => 'manufacture-contact/create',
                 'GET api/v1/manufacture-contacts' => 'manufacture-contact/index',
                 'PUT api/v1/manufacture-contacts/<id:\d+>' => 'manufacture-contact/update',
-                'DELETE api/v1/manufacture-contacts/<id:\d+>' => 'manufacture-contact/delete'
+                'DELETE api/v1/manufacture-contacts/<id:\d+>' => 'manufacture-contact/delete',
+
+                'GET api/v1/cities' => 'city/index-parentid',
             ],
         ],
         'jwt' => [
