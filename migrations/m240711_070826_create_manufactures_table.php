@@ -24,7 +24,8 @@ class m240711_070826_create_manufactures_table extends Migration
             'is_work' => $this->boolean()->defaultValue(true),
         ]);
 
-        // Индексы
+        $this->addForeignKey('fk-manufactures-id_region', 'manufactures', 'id_region', 'city', 'parentid');
+        $this->addForeignKey('fk-manufactures-id_city', 'manufactures', 'id_city', 'city', 'id');
         $this->createIndex('idx-manufactures-id_region', '{{%manufactures}}', 'id_region');
         $this->createIndex('idx-manufactures-id_city', '{{%manufactures}}', 'id_city');
     }
@@ -34,6 +35,8 @@ class m240711_070826_create_manufactures_table extends Migration
      */
     public function safeDown()
     {
+        $this->dropForeignKey('fk-manufactures-id_region', 'manufactures');
+        $this->dropForeignKey('fk-manufactures-id_city', 'manufactures');
         $this->dropIndex('idx-manufactures-id_region', '{{%manufactures}}');
         $this->dropIndex('idx-manufactures-id_city', '{{%manufactures}}');
         $this->dropTable('{{%manufactures}}');
