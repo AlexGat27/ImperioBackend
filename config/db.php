@@ -4,7 +4,7 @@ return [
     'class' => 'yii\db\Connection',
     'dsn' => 'mysql:host=localhost;dbname=imperio',
     'username' => 'root',
-    'password' => 'shurikgat2704',
+    'password' => '',
     'charset' => 'utf8',
 
     // Schema cache options (for production environment)

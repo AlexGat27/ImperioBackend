@@ -3,15 +3,12 @@
 namespace app\controllers;
 
 use app\components\Middleware\TokenFilter;
+use app\models\DTO\ManufactureForm;
 use app\models\DTO\ManufactureResponse;
-use app\models\ManufactureForm;
-use yii\filters\AccessControl;
-use yii\helpers\ArrayHelper;
-use yii\rest\Controller;
-use app\models\Manufacture;
-use app\models\ManufactureEmail;
-use app\models\ManufactureContact;
+use app\models\Manufactures;
 use Yii;
+use yii\filters\AccessControl;
+use yii\rest\Controller;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
@@ -44,7 +41,7 @@ class ManufactureController extends Controller
     }
     public function actionIndex()
     {
-        $manufactures = Manufacture::find()->all();
+        $manufactures = Manufactures::find()->all();
         $response = [];
 
         foreach ($manufactures as $manufacture) {
@@ -63,7 +60,7 @@ class ManufactureController extends Controller
 
     public function actionView($id)
     {
-        $model = Manufacture::findOne($id);
+        $model = Manufactures::findOne($id);
         return [
             "model" => $model,
             "emails" => $model->manufactureEmails,
@@ -105,7 +102,7 @@ class ManufactureController extends Controller
     public function actionSearchinmanufacture()
     {
         $queryParams = Yii::$app->request->getQueryParams();
-        $query = Manufacture::find();
+        $query = Manufactures::find();
 
         if (isset($queryParams['category'])) {
             $query->andWhere(['category' => $queryParams['category']]);
@@ -136,7 +133,7 @@ class ManufactureController extends Controller
 
     protected function findModel($id)
     {
-        if (($model = Manufacture::findOne($id)) !== null) {
+        if (($model = Manufactures::findOne($id)) !== null) {
             return $model;
         }
         throw new NotFoundHttpException('The requested page does not exist.');

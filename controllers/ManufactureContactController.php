@@ -3,7 +3,7 @@
 namespace app\controllers;
 
 use app\components\Middleware\TokenFilter;
-use app\models\Manufacture;
+use app\models\Manufactures;
 use yii\filters\AccessControl;
 use yii\rest\Controller;
 use app\models\ManufactureContact;
@@ -54,7 +54,7 @@ class ManufactureContactController extends Controller
         $manufactureName = $request['manufacture_name'] ?? null;
 
         if ($manufactureName) {
-            $manufacture = Manufacture::findOne(['name' => $manufactureName]);
+            $manufacture = Manufactures::findOne(['name' => $manufactureName]);
             if (!$manufacture) {
                 throw new NotFoundHttpException('The requested manufacturer does not exist.');
             }
