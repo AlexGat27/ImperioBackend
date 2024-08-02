@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\components\Middleware\TokenFilter;
+use app\models\DTO\ManufactureResponse;
 use app\models\ManufactureForm;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
@@ -34,7 +35,7 @@ class ManufactureController extends Controller
             'rules' => [
                 [
                     'allow' => true,
-                    'roles' => ['manufactures'],
+                    'roles' => ['user', 'snab', 'admin'],
                 ],
             ],
         ];
@@ -99,6 +100,38 @@ class ManufactureController extends Controller
         $model = $this->findModel($id);
         $model->is_work = false;
         return $model->save();
+    }
+
+    public function actionSearchinmanufacture()
+    {
+        $queryParams = Yii::$app->request->getQueryParams();
+        $query = Manufacture::find();
+
+        if (isset($queryParams['category'])) {
+            $query->andWhere(['category' => $queryParams['category']]);
+        }
+        if (isset($queryParams['district'])) {
+            $query->andWhere(['district' => $queryParams['district']]);
+        }
+        if (isset($queryParams['region'])) {
+            $query->andWhere(['region' => $queryParams['region']]);
+        }
+        if (isset($queryParams['city'])) {
+            $query->andWhere(['city' => $queryParams['city']]);
+        }
+        $manufactures = $query->with(['manufactureEmails', 'manufactureContacts'])->all();
+        $response = [];
+        foreach ($manufactures as $manufacture) {
+            $manufactureResponse = new ManufactureResponse();
+            if($manufactureResponse->load($manufacture->toArray())){
+                $response[] = $manufactureResponse;
+            }
+            else{
+                Yii::$app->response->statusCode = 400;
+                return ['status' => 'error', 'message' => $manufactureResponse->errors];
+            }
+        }
+        return $response;
     }
 
     protected function findModel($id)
