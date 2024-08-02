@@ -20,7 +20,7 @@ use Yii;
  * @property ManufactureContact[] $manufactureContacts
  * @property ManufactureEmail[] $manufactureEmails
  */
-class Manufacture extends \yii\db\ActiveRecord
+class Manufactures extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}

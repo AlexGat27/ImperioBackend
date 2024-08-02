@@ -5,21 +5,21 @@ namespace app\models;
 use Yii;
 
 /**
- * This is the model class for table "products".
+ * This is the model class for table "catalog".
  *
  * @property int $id
  * @property string $name
  *
- * @property ManufactureProducts[] $manufactureProducts
+ * @property ManufactureCatalog[] $manufactureCatalogs
  */
-class Products extends \yii\db\ActiveRecord
+class Catalog extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'products';
+        return 'catalog';
     }
 
     /**
@@ -45,12 +45,12 @@ class Products extends \yii\db\ActiveRecord
     }
 
     /**
-     * Gets query for [[ManufactureProducts]].
+     * Gets query for [[ManufactureCatalogs]].
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getManufactureProducts()
+    public function getManufactureCatalogs()
     {
-        return $this->hasMany(ManufactureProducts::class, ['product_id' => 'id']);
+        return $this->hasMany(ManufactureCatalog::class, ['catalog_id' => 'id']);
     }
 }

@@ -1,8 +1,9 @@
 <?php
 
-namespace app\models;
+namespace app\models\DTO;
 
-use Yii;
+use app\models\Manufactures;
+use app\models\ManufactureEmail;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
 
@@ -68,9 +69,9 @@ class ManufactureForm extends Model
         }
 
         if ($this->id) {
-            $model = Manufacture::findOne($this->id);
+            $model = Manufactures::findOne($this->id);
         } else {
-            $model = new Manufacture();
+            $model = new Manufactures();
         }
 
         $model->attributes = $this->attributes;

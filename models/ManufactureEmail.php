@@ -11,7 +11,7 @@ use Yii;
  * @property int $id_manufacture
  * @property string $email
  *
- * @property Manufacture $manufacture
+ * @property Manufactures $manufacture
  */
 class ManufactureEmail extends \yii\db\ActiveRecord
 {
@@ -32,7 +32,7 @@ class ManufactureEmail extends \yii\db\ActiveRecord
             [['id_manufacture', 'email'], 'required'],
             [['id_manufacture'], 'integer'],
             [['email'], 'string', 'max' => 255],
-            [['id_manufacture'], 'exist', 'skipOnError' => true, 'targetClass' => Manufacture::class, 'targetAttribute' => ['id_manufacture' => 'id']],
+            [['id_manufacture'], 'exist', 'skipOnError' => true, 'targetClass' => Manufactures::class, 'targetAttribute' => ['id_manufacture' => 'id']],
         ];
     }
 
@@ -43,18 +43,18 @@ class ManufactureEmail extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'id_manufacture' => 'Id Manufacture',
+            'id_manufacture' => 'Id Manufactures',
             'email' => 'Email',
         ];
     }
 
     /**
-     * Gets query for [[Manufacture]].
+     * Gets query for [[Manufactures]].
      *
      * @return \yii\db\ActiveQuery
      */
     public function getManufacture()
     {
-        return $this->hasOne(Manufacture::class, ['id' => 'id_manufacture']);
+        return $this->hasOne(Manufactures::class, ['id' => 'id_manufacture']);
     }
 }

@@ -13,7 +13,7 @@ use Yii;
  * @property string $name_personal
  * @property string|null $note
  *
- * @property Manufacture $manufacture
+ * @property Manufactures $manufacture
  */
 class ManufactureContact extends \yii\db\ActiveRecord
 {
@@ -35,7 +35,7 @@ class ManufactureContact extends \yii\db\ActiveRecord
             [['id_manufacture'], 'integer'],
             [['note'], 'string'],
             [['telephone', 'name_personal'], 'string', 'max' => 255],
-            [['id_manufacture'], 'exist', 'skipOnError' => true, 'targetClass' => Manufacture::class, 'targetAttribute' => ['id_manufacture' => 'id']],
+            [['id_manufacture'], 'exist', 'skipOnError' => true, 'targetClass' => Manufactures::class, 'targetAttribute' => ['id_manufacture' => 'id']],
         ];
     }
 
@@ -46,7 +46,7 @@ class ManufactureContact extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'id_manufacture' => 'Id Manufacture',
+            'id_manufacture' => 'Id Manufactures',
             'telephone' => 'Telephone',
             'name_personal' => 'Name Personal',
             'note' => 'Note',
@@ -54,12 +54,12 @@ class ManufactureContact extends \yii\db\ActiveRecord
     }
 
     /**
-     * Gets query for [[Manufacture]].
+     * Gets query for [[Manufactures]].
      *
      * @return \yii\db\ActiveQuery
      */
     public function getManufacture()
     {
-        return $this->hasOne(Manufacture::class, ['id' => 'id_manufacture']);
+        return $this->hasOne(Manufactures::class, ['id' => 'id_manufacture']);
     }
 }
