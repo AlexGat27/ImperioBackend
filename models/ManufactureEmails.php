@@ -5,24 +5,22 @@ namespace app\models;
 use Yii;
 
 /**
- * This is the model class for table "manufacture_contacts".
+ * This is the model class for table "manufacture_emails".
  *
  * @property int $id
  * @property int $id_manufacture
- * @property string $telephone
- * @property string $name_personal
- * @property string|null $note
+ * @property string $email
  *
  * @property Manufactures $manufacture
  */
-class ManufactureContact extends \yii\db\ActiveRecord
+class ManufactureEmails extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'manufacture_contacts';
+        return 'manufacture_emails';
     }
 
     /**
@@ -31,10 +29,9 @@ class ManufactureContact extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_manufacture', 'telephone', 'name_personal'], 'required'],
+            [['id_manufacture', 'email'], 'required'],
             [['id_manufacture'], 'integer'],
-            [['note'], 'string'],
-            [['telephone', 'name_personal'], 'string', 'max' => 255],
+            [['email'], 'string', 'max' => 255],
             [['id_manufacture'], 'exist', 'skipOnError' => true, 'targetClass' => Manufactures::class, 'targetAttribute' => ['id_manufacture' => 'id']],
         ];
     }
@@ -46,15 +43,13 @@ class ManufactureContact extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'id_manufacture' => 'Id Manufactures',
-            'telephone' => 'Telephone',
-            'name_personal' => 'Name Personal',
-            'note' => 'Note',
+            'id_manufacture' => 'Id Manufacture',
+            'email' => 'Email',
         ];
     }
 
     /**
-     * Gets query for [[Manufactures]].
+     * Gets query for [[Manufacture]].
      *
      * @return \yii\db\ActiveQuery
      */

@@ -31,10 +31,6 @@ class RootUserController extends Controller
 
         try {
             if ($user->save()) {
-                // Получение компонента управления доступом
-
-
-                // Проверка существования роли 'admin'
                 $role = $auth->getRole('admin');
                 if ($role !== null) {
                     $auth->assign($role, $user->id);

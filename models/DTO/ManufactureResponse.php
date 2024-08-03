@@ -3,7 +3,9 @@
 namespace app\models\DTO;
 
 use app\models\ManufactureContact;
+use app\models\ManufactureContacts;
 use app\models\ManufactureEmail;
+use app\models\ManufactureEmails;
 use yii\base\Model;
 
 /**
@@ -14,8 +16,8 @@ use yii\base\Model;
  * @property string $region
  * @property string $city
  *
- * @property ManufactureContact[] $manufactureContacts
- * @property ManufactureEmail[] $manufactureEmails
+ * @property ManufactureContacts[] $manufactureContacts
+ * @property ManufactureEmails[] $manufactureEmails
  */
 class ManufactureResponse extends Model
 {
@@ -29,15 +31,6 @@ class ManufactureResponse extends Model
             [['name', 'website', 'region', 'city'], 'required'],
             [['name', 'website', 'region', 'city'], 'string', 'max' => 255],
             [['website'], 'url'], // Валидация URL
-        ];
-    }
-    public function attributeLabels()
-    {
-        return [
-            'name' => 'Name',
-            'website' => 'Website',
-            'region' => 'Region',
-            'city' => 'City',
         ];
     }
     // Метод для преобразования данных в массив

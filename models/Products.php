@@ -9,8 +9,13 @@ use Yii;
  *
  * @property int $id
  * @property string $name
+ * @property int $width
+ * @property int $length
+ * @property int $height
+ * @property int $weight
  *
- * @property ManufactureProducts[] $manufactureProducts
+ * @property Manufactures[] $manufactures
+ * @property Category[] $productCategories
  */
 class Products extends \yii\db\ActiveRecord
 {
@@ -29,6 +34,7 @@ class Products extends \yii\db\ActiveRecord
     {
         return [
             [['name'], 'required'],
+            [['width', 'length', 'height', 'weight'], 'integer'],
             [['name'], 'string', 'max' => 255],
         ];
     }
@@ -41,6 +47,10 @@ class Products extends \yii\db\ActiveRecord
         return [
             'id' => 'ID',
             'name' => 'Name',
+            'width' => 'Width',
+            'length' => 'Length',
+            'height' => 'Height',
+            'weight' => 'Weight',
         ];
     }
 
@@ -51,6 +61,18 @@ class Products extends \yii\db\ActiveRecord
      */
     public function getManufactureProducts()
     {
-        return $this->hasMany(ManufactureProducts::class, ['product_id' => 'id']);
+        return $this->hasMany(Manufactures::class, ['id' => 'manufacture_id'])
+            ->viaTable('manufacture_products', ['product_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[ProductCategories]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProductCategories()
+    {
+        return $this->hasMany(Category::class, ['id' => 'category_id'])
+            ->viaTable('product_category', ['product_id' => 'id']);
     }
 }

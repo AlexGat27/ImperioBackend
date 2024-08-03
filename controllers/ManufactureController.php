@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\components\Middleware\TokenFilter;
+use app\models\Catalog;
 use app\models\DTO\ManufactureForm;
 use app\models\DTO\ManufactureResponse;
 use app\models\Manufactures;
@@ -17,13 +18,6 @@ class ManufactureController extends Controller
     public function behaviors()
     {
         $behaviors = parent::behaviors();
-
-        $behaviors['contentNegotiator'] = [
-            'class' => \yii\filters\ContentNegotiator::class,
-            'formats' => [
-                'application/json' => Response::FORMAT_JSON,
-            ],
-        ];
         $behaviors['tokenFilter'] = [
             'class' => TokenFilter::class,
         ];
@@ -99,28 +93,38 @@ class ManufactureController extends Controller
         return $model->save();
     }
 
-    public function actionSearchinmanufacture()
+    public function actionSearchInManufacture()
     {
         $queryParams = Yii::$app->request->getQueryParams();
         $query = Manufactures::find();
 
         if (isset($queryParams['category'])) {
-            $query->andWhere(['category' => $queryParams['category']]);
-        }
-        if (isset($queryParams['district'])) {
-            $query->andWhere(['district' => $queryParams['district']]);
-        }
-        if (isset($queryParams['region'])) {
-            $query->andWhere(['region' => $queryParams['region']]);
-        }
-        if (isset($queryParams['city'])) {
-            $query->andWhere(['city' => $queryParams['city']]);
+            $query->joinWith(['catalogs' => function($q) use ($queryParams) {
+                $q->andWhere(['catalog.name' => $queryParams['category']]);
+            }]);
+            if (isset($queryParams['district'])) {
+                $query->joinWith(['district' => function($q) use ($queryParams) {
+                    $q->andWhere(['city.name' => $queryParams['district']]);
+                }]);
+                if (isset($queryParams['region'])) {
+                    $query->joinWith(['region' => function($q) use ($queryParams) {
+                        $q->andWhere(['city.name' => $queryParams['region']]);
+                    }]);
+                    if (isset($queryParams['city'])) {
+                        $query->joinWith(['city' => function($q) use ($queryParams) {
+                            $q->andWhere(['city.name' => $queryParams['city']]);
+                        }]);
+                    }
+                }
+            }
         }
         $manufactures = $query->with(['manufactureEmails', 'manufactureContacts'])->all();
         $response = [];
         foreach ($manufactures as $manufacture) {
             $manufactureResponse = new ManufactureResponse();
             if($manufactureResponse->load($manufacture->toArray())){
+                $manufactureResponse->region = $manufacture->region->name ?? '';
+                $manufactureResponse->city = $manufacture->city->name ?? '';
                 $response[] = $manufactureResponse;
             }
             else{

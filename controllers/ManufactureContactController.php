@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\components\Middleware\TokenFilter;
+use app\models\ManufactureContacts;
 use app\models\Manufactures;
 use yii\filters\AccessControl;
 use yii\rest\Controller;
@@ -16,13 +17,6 @@ class ManufactureContactController extends Controller
     public function behaviors()
     {
         $behaviors = parent::behaviors();
-
-        $behaviors['contentNegotiator'] = [
-            'class' => \yii\filters\ContentNegotiator::class,
-            'formats' => [
-                'application/json' => Response::FORMAT_JSON,
-            ],
-        ];
         $behaviors['tokenFilter'] = [
             'class' => TokenFilter::class,
         ];
@@ -31,16 +25,15 @@ class ManufactureContactController extends Controller
             'rules' => [
                 [
                     'allow' => true,
-                    'roles' => ['manufactures'],
+                    'roles' => ['user', 'snab', 'admin'],
                 ],
             ],
         ];
-
         return $behaviors;
     }
     public function actionIndex()
     {
-        return ManufactureContact::find()->all();
+        return ManufactureContacts::find()->all();
     }
 
     public function actionView($id)
@@ -59,7 +52,7 @@ class ManufactureContactController extends Controller
                 throw new NotFoundHttpException('The requested manufacturer does not exist.');
             }
 
-            $model = new ManufactureContact();
+            $model = new ManufactureContacts();
             $model->load($request, '');
             $model->id_manufacture = $manufacture->id;
 
@@ -95,7 +88,7 @@ class ManufactureContactController extends Controller
 
     protected function findModel($id)
     {
-        if (($model = ManufactureContact::findOne($id)) !== null) {
+        if (($model = ManufactureContacts::findOne($id)) !== null) {
             return $model;
         }
         throw new NotFoundHttpException('The requested page does not exist.');

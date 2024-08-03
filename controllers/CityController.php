@@ -13,13 +13,6 @@ class CityController extends Controller
     public function behaviors()
     {
         $behaviors = parent::behaviors();
-
-        $behaviors['contentNegotiator'] = [
-            'class' => \yii\filters\ContentNegotiator::class,
-            'formats' => [
-                'application/json' => Response::FORMAT_JSON,
-            ],
-        ];
         $behaviors['tokenFilter'] = [
             'class' => TokenFilter::class,
         ];
@@ -28,7 +21,7 @@ class CityController extends Controller
             'rules' => [
                 [
                     'allow' => true,
-                    'roles' => ['city'],
+                    'roles' => ['admin'],
                 ],
             ],
         ];

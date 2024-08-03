@@ -2,8 +2,9 @@
 
 namespace app\models\DTO;
 
+use app\models\ManufactureCatalog;
 use app\models\Manufactures;
-use app\models\ManufactureEmail;
+use app\models\ManufactureEmails;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
 
@@ -16,15 +17,15 @@ class ManufactureForm extends Model
     public $id_city;
     public $address_loading;
     public $note;
-    public $create_your_project = false;
-    public $is_work = true;
+    public $create_your_project;
+    public $is_work;
     public $emails = [];
 
     public function rules()
     {
         return [
             [['name', 'emails'], 'required'],
-            [['id_region', 'id_city'], 'integer'],
+            [['id_region', 'id_city', 'id_catalog'], 'integer'],
             [['create_your_project', 'is_work'], 'boolean'],
             [['note'], 'string'],
             [['name', 'website', 'address_loading'], 'string', 'max' => 255],
@@ -67,7 +68,6 @@ class ManufactureForm extends Model
         if (!$this->validate()) {
             return false;
         }
-
         if ($this->id) {
             $model = Manufactures::findOne($this->id);
         } else {
@@ -76,13 +76,13 @@ class ManufactureForm extends Model
 
         $model->attributes = $this->attributes;
         if ($model->save()) {
-            ManufactureEmail::deleteAll(['id_manufacture' => $model->id]);
+            ManufactureEmails::deleteAll(['id_manufacture' => $model->id]);
             if (is_string($this->emails)) {
                 $this->emails = explode(',', $this->emails);
             }
             $this->emails = array_map('trim', $this->emails);
             foreach ($this->emails as $email) {
-                $emailModel = new ManufactureEmail();
+                $emailModel = new ManufactureEmails();
                 $emailModel->id_manufacture = $model->id;
                 $emailModel->email = $email;
                 $emailModel->save();

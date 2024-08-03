@@ -14,11 +14,15 @@ use Yii;
  * @property int|null $id_city
  * @property string|null $address_loading
  * @property string|null $note
- * @property boolean $create_your_project
- * @property boolean $is_work
+ * @property int|null $create_your_project
+ * @property int|null $is_work
  *
- * @property ManufactureContact[] $manufactureContacts
- * @property ManufactureEmail[] $manufactureEmails
+ * @property City $city
+ * @property Catalog[] $manufactureCatalogs
+ * @property ManufactureContacts[] $manufactureContacts
+ * @property ManufactureEmails[] $manufactureEmails
+ * @property Products[] $manufactureProducts
+ * @property City $region
  */
 class Manufactures extends \yii\db\ActiveRecord
 {
@@ -36,11 +40,12 @@ class Manufactures extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'is_work', 'create_your_project'], 'required'],
-            [['id_region', 'id_city'], 'integer'],
-            [['is_work', 'create_your_project'], 'boolean'],
+            [['name'], 'required'],
+            [['id_region', 'id_city', 'create_your_project', 'is_work'], 'integer'],
             [['note'], 'string'],
             [['name', 'website', 'address_loading'], 'string', 'max' => 255],
+            [['id_city'], 'exist', 'skipOnError' => true, 'targetClass' => City::class, 'targetAttribute' => ['id_city' => 'id']],
+            [['id_region'], 'exist', 'skipOnError' => true, 'targetClass' => City::class, 'targetAttribute' => ['id_region' => 'id']],
         ];
     }
 
@@ -63,22 +68,67 @@ class Manufactures extends \yii\db\ActiveRecord
     }
 
     /**
-     * Gets query for [[ManufactureContact]].
+     * Gets query for [[City]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCity()
+    {
+        return $this->hasOne(City::class, ['id' => 'id_city']);
+    }
+    public function getDistrict(){
+        return $this->hasOne(City::class, ['id' => $this->getRegion()->one()->parentid]);
+    }
+
+    /**
+     * Gets query for [[ManufactureCatalogs]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getManufactureCatalogs()
+    {
+        return $this->hasMany(Catalog::class, ['id' => 'manufacture_id'])
+            ->viaTable('manufacture_catalog', ['manufacture_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[ManufactureContacts]].
      *
      * @return \yii\db\ActiveQuery
      */
     public function getManufactureContacts()
     {
-        return $this->hasMany(ManufactureContact::class, ['id_manufacture' => 'id']);
+        return $this->hasMany(ManufactureContacts::class, ['id_manufacture' => 'id']);
     }
 
     /**
-     * Gets query for [[ManufactureEmail]].
+     * Gets query for [[ManufactureEmails]].
      *
      * @return \yii\db\ActiveQuery
      */
     public function getManufactureEmails()
     {
-        return $this->hasMany(ManufactureEmail::class, ['id_manufacture' => 'id']);
+        return $this->hasMany(ManufactureEmails::class, ['id_manufacture' => 'id']);
+    }
+
+    /**
+     * Gets query for [[ManufactureProducts]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getManufactureProducts()
+    {
+        return $this->hasMany(Products::class, ['id' => 'product_id'])
+            ->viaTable('manufacture_products', ['manufacture_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[Region]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getRegion()
+    {
+        return $this->hasOne(City::class, ['id' => 'id_region']);
     }
 }

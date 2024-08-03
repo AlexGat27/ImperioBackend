@@ -24,7 +24,7 @@ class m240711_070826_create_manufactures_table extends Migration
             'is_work' => $this->boolean()->defaultValue(true),
         ]);
 
-        $this->addForeignKey('fk-manufactures-id_region', 'manufactures', 'id_region', 'city', 'parentid');
+        $this->addForeignKey('fk-manufactures-id_region', 'manufactures', 'id_region', 'city', 'id');
         $this->addForeignKey('fk-manufactures-id_city', 'manufactures', 'id_city', 'city', 'id');
         $this->createIndex('idx-manufactures-id_region', '{{%manufactures}}', 'id_region');
         $this->createIndex('idx-manufactures-id_city', '{{%manufactures}}', 'id_city');

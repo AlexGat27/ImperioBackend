@@ -15,7 +15,7 @@ use Yii;
  * @property int|null $region_id
  * @property string|null $notes
  *
- * @property CarsLogistTypeCars[] $carsLogistTypeCars
+ * @property TypeCars[] $carsLogistTypeCars
  * @property City $fedDist
  * @property City $region
  */
@@ -65,9 +65,10 @@ class CarsLogist extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getCarsLogistTypeCars()
+    public function getTypeCars()
     {
-        return $this->hasMany(CarsLogistTypeCars::class, ['cars_logist_id' => 'id']);
+        return $this->hasMany(TypeCars::class, ['id' => 'cars_logist_id'])
+            ->viaTable('type_cars', ['type_cars_id' => 'id']);
     }
 
     /**
@@ -75,9 +76,9 @@ class CarsLogist extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getFedDist()
+    public function getDistrict()
     {
-        return $this->hasOne(City::class, ['parentid' => 'fedDist_id']);
+        return $this->hasOne(City::class, ['id' => 'fedDist_id']);
     }
 
     /**
