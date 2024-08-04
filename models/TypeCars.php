@@ -10,7 +10,7 @@ use Yii;
  * @property int $id
  * @property string $name
  *
- * @property CarsLogistTypeCars[] $carsLogistTypeCars
+ * @property CarsLogist[] $carsLogist
  */
 class TypeCars extends \yii\db\ActiveRecord
 {
@@ -51,6 +51,7 @@ class TypeCars extends \yii\db\ActiveRecord
      */
     public function getCarsLogistTypeCars()
     {
-        return $this->hasMany(CarsLogistTypeCars::class, ['type_cars_id' => 'id']);
+        return $this->hasMany(CarsLogist::class, ['id' => 'type_cars_id'])
+            ->viaTable('cars_logist_type_cars', ['cars_logist_id' => 'id']);
     }
 }

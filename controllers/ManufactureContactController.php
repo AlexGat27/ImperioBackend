@@ -7,7 +7,6 @@ use app\models\ManufactureContacts;
 use app\models\Manufactures;
 use yii\filters\AccessControl;
 use yii\rest\Controller;
-use app\models\ManufactureContact;
 use Yii;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;

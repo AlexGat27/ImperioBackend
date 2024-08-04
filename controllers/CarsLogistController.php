@@ -4,9 +4,11 @@ namespace app\controllers;
 
 use app\components\Middleware\TokenFilter;
 use app\models\CarsLogist;
+use app\models\City;
 use app\models\DTO\CarsLogistResponse;
 use app\models\TypeCars;
 use Yii;
+use yii\db\Query;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\Response;
@@ -38,7 +40,7 @@ class CarsLogistController extends Controller
     public function actionCreate(){
         $postData = Yii::$app->request->getBodyParams();
         $model = new CarsLogist();
-        $model->load($postData);
+        $model->load($postData, '');
         if ($model->save()) {
             return ['status' => 'success', 'model' => $model];
         }
@@ -47,37 +49,34 @@ class CarsLogistController extends Controller
     }
     public function actionSearch(){
         $queryParams = Yii::$app->request->getQueryParams();
-        $query = CarsLogist::find();
+        $query = (new Query())
+            ->select([
+                'cars_logist.name',
+                'cars_logist.telephone',
+                'cars_logist.email',
+                'cars_logist.notes',
+                'GROUP_CONCAT(DISTINCT city.name ORDER BY city.name ASC) AS region_names',
+                'GROUP_CONCAT(DISTINCT type_cars.name ORDER BY type_cars.name ASC) AS car_type_names'])
+            ->from('cars_logist')
+            ->leftJoin('cars_logist_type_cars', 'cars_logist_type_cars.cars_logist_id = cars_logist.id')
+            ->leftJoin('type_cars', 'type_cars.id = cars_logist_type_cars.type_cars_id')
+            ->leftJoin('city', 'city.parentid = cars_logist.fedDist_id')
+            ->groupBy('cars_logist.name, cars_logist.telephone, cars_logist.email, cars_logist.notes');
 
-        if (isset($queryParams['type_car_id'])) {
-            $query->joinWith(['type_cars' => function($q) use ($queryParams) {
-                $q->andWhere(['type_cars.id' => $queryParams['type_car_id']]);
-            }]);
+        if (isset($queryParams['type_cars_id'])) {
+            $query->andWhere(['type_cars.id' => $queryParams['type_cars_id']]);
             if (isset($queryParams['district_id'])) {
-                $query->joinWith(['district' => function($q) use ($queryParams) {
-                    $q->andWhere(['city.id' => $queryParams['district_id']]);
-                }]);
+                $query->andWhere(['city.parentid' => $queryParams['district_id']]);
                 if (isset($queryParams['region'])) {
-                    $query->joinWith(['region' => function($q) use ($queryParams) {
-                        $q->andWhere(['city.name' => $queryParams['region']]);
-                    }]);
+                    $query->andWhere(['like', 'city.name', $queryParams['region']]);
                 }
             }
         }
-        $logists = $query->all();
-        $response = [];
-        foreach ($logists as $logist) {
-            $logistResponse = new CarsLogistResponse();
-            if($logistResponse->load($logist->toArray())){
-                $logistResponse->type_cars_name = $logist->type_cars->name;
-
-                $response[] = $logistResponse;
-            }
-            else{
-                Yii::$app->response->statusCode = 400;
-                return ['status' => 'error', 'message' => $logistResponse->errors];
-            }
+        $cars_logist = $query->all();
+        foreach ($cars_logist as &$logist) {
+            $logist['region_names'] = explode(',', $logist['region_names']);
+            $logist['car_type_names'] = $logist['car_type_names'] ? explode(',', $logist['car_type_names']) : [];
         }
-        return $response;
+        return $cars_logist;
     }
 }

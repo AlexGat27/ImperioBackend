@@ -30,43 +30,32 @@ class ProductController extends Controller
 
         return $behaviors;
     }
-    public function actionSearch(){
+    public function actionSearch()
+    {
         $queryParams = Yii::$app->request->getQueryParams();
-        $models = [];
-        $response = [];
-        if (isset($queryParams['favourites']) && $queryParams['favourites'] == 'true') {
-            if (isset($queryParams['product_name']) && isset($queryParams['category_name'])) {
-                $models = Products::find()
-                    ->with('product-categories')
-                    ->where(['like', 'name', $queryParams['product_name']])
-                    ->andWhere(['like', 'category.name', $queryParams['category_name']])
-                    ->all();
-            }
-        }elseif (isset($queryParams['category']) && $queryParams['category'] == 'true'){
-            if (isset($queryParams['name'])) {
-                $models = Products::find()
-                    ->with('product-categories')
-                    ->where(['like', 'category.name', $queryParams['name']])
-                    ->all();
-            }
-        }elseif (isset($queryParams['product']) && $queryParams['product'] == 'true'){
-            if (isset($queryParams['name'])) {
-                $models = Products::find()
-                    ->with('product-categories')
-                    ->where(['like', 'name', $queryParams['name']])
-                    ->all();
-            }
-        }else{
-            Yii::$app->response->statusCode = 400;
-            return ['status' => 'error', 'message' => 'No checkboxes changed'];
+        $product_name = $queryParams['product_name'] ?? '';
+        $category_name = $queryParams['category_name'] ?? '';
+        $searchName = $queryParams['checkbox_product'] ?? 0;
+        $searchCategory = $queryParams['checkbox_category'] ?? 0;
+        $searchFavorite = $queryParams['checkbox_favorite'] ?? 0;
+
+        $query = (new \yii\db\Query())
+            ->select(['p.id', 'p.name', 'p.length', 'p.width', 'p.height', 'p.weight', 'c.name AS category_name'])
+            ->from('products p')
+            ->leftJoin('product_category pc', 'pc.product_id = p.id')
+            ->leftJoin('category c', 'c.id = pc.category_id');
+
+        if ($searchFavorite){
+            $query->andWhere(['like', 'p.name', $product_name]);
+            $query->andWhere(['like', 'c.name', $category_name]);
         }
-        foreach ($models as $model) {
-            $modelResponse = new ProductsResponse();
-            if($modelResponse->load($model)){
-                $modelResponse->category = $model->category->name;
-                $response[] = $modelResponse;
-            }
+        elseif ($searchName) {
+            $query->andWhere(['like', 'p.name', $product_name]);
         }
-        return $response;
+        elseif ($searchCategory) {
+            $query->orWhere(['like', 'c.name', $category_name]);
+        }
+        $products = $query->all();
+        return $products;
     }
 }

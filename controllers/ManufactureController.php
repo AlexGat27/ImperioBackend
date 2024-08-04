@@ -8,6 +8,7 @@ use app\models\DTO\ManufactureForm;
 use app\models\DTO\ManufactureResponse;
 use app\models\Manufactures;
 use Yii;
+use yii\db\Query;
 use yii\filters\AccessControl;
 use yii\rest\Controller;
 use yii\web\NotFoundHttpException;
@@ -93,47 +94,67 @@ class ManufactureController extends Controller
         return $model->save();
     }
 
-    public function actionSearchInManufacture()
+    public function actionSearchInManufactures()
     {
         $queryParams = Yii::$app->request->getQueryParams();
-        $query = Manufactures::find();
 
+        // Создаем базовый запрос
+        $query = (new \yii\db\Query())
+            ->select(['m.id', 'm.name AS manufacture_name', 'm.website', 'c.name AS category_name',
+                'r.name AS region_name', 'ci.name AS city_name', 'd.name AS district_name'])
+            ->from('manufactures m')
+            ->leftJoin('manufacture_category mc', 'm.id = mc.manufacture_id')
+            ->leftJoin('category c', 'mc.category_id = c.id')
+            ->leftJoin('city r', 'm.id_region = r.id')
+            ->leftJoin('city ci', 'm.id_city = ci.id')
+            ->leftJoin('city d', 'r.parentid = d.id');
+
+        // Добавляем фильтрацию по параметрам
         if (isset($queryParams['category'])) {
-            $query->joinWith(['catalogs' => function($q) use ($queryParams) {
-                $q->andWhere(['catalog.name' => $queryParams['category']]);
-            }]);
+            $query->andWhere(['like', 'c.name', $queryParams['category']]);
             if (isset($queryParams['district'])) {
-                $query->joinWith(['district' => function($q) use ($queryParams) {
-                    $q->andWhere(['city.name' => $queryParams['district']]);
-                }]);
+                $query->andWhere(['like', 'd.name', $queryParams['district']]);
                 if (isset($queryParams['region'])) {
-                    $query->joinWith(['region' => function($q) use ($queryParams) {
-                        $q->andWhere(['city.name' => $queryParams['region']]);
-                    }]);
+                    $query->andWhere(['like', 'r.name', $queryParams['region']]);
                     if (isset($queryParams['city'])) {
-                        $query->joinWith(['city' => function($q) use ($queryParams) {
-                            $q->andWhere(['city.name' => $queryParams['city']]);
-                        }]);
+                        $query->andWhere(['like', 'ci.name', $queryParams['city']]);
                     }
                 }
             }
         }
-        $manufactures = $query->with(['manufactureEmails', 'manufactureContacts'])->all();
+        $manufactures = $query->all();
         $response = [];
         foreach ($manufactures as $manufacture) {
-            $manufactureResponse = new ManufactureResponse();
-            if($manufactureResponse->load($manufacture->toArray())){
-                $manufactureResponse->region = $manufacture->region->name ?? '';
-                $manufactureResponse->city = $manufacture->city->name ?? '';
-                $response[] = $manufactureResponse;
-            }
-            else{
-                Yii::$app->response->statusCode = 400;
-                return ['status' => 'error', 'message' => $manufactureResponse->errors];
-            }
+            // Получаем электронные адреса
+            $emailsQuery = (new \yii\db\Query())
+                ->select('email')
+                ->from('manufacture_emails')
+                ->where(['id_manufacture' => $manufacture['id']]);
+            $emails = $emailsQuery->column();
+
+            // Получаем контакты
+            $contactsQuery = (new \yii\db\Query())
+                ->select(['telephone', 'name_personal', 'note'])
+                ->from('manufacture_contacts')
+                ->where(['id_manufacture' => $manufacture['id']]);
+            $contacts = $contactsQuery->all();
+
+            // Формируем ответ
+            $response[] = [
+                "manufacture_name" => $manufacture['manufacture_name'],
+                "website" => $manufacture['website'],
+                "category" => $manufacture['category_name'],
+                "region" => $manufacture['region_name'],
+                "city" => $manufacture['city_name'],
+                "district" => $manufacture['district_name'],
+                "emails" => $emails,
+                "contacts" => $contacts,
+            ];
         }
+
         return $response;
     }
+
 
     protected function findModel($id)
     {

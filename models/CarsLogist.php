@@ -67,8 +67,8 @@ class CarsLogist extends \yii\db\ActiveRecord
      */
     public function getTypeCars()
     {
-        return $this->hasMany(TypeCars::class, ['id' => 'cars_logist_id'])
-            ->viaTable('type_cars', ['type_cars_id' => 'id']);
+        return $this->hasMany(TypeCars::class, ['id' => 'type_cars_id'])
+            ->viaTable('cars_logist_type_cars', ['cars_logist_id' => 'id']);
     }
 
     /**
@@ -78,7 +78,7 @@ class CarsLogist extends \yii\db\ActiveRecord
      */
     public function getDistrict()
     {
-        return $this->hasOne(City::class, ['id' => 'fedDist_id']);
+        return $this->hasOne(City::class, ['parentid' => 'fedDist_id']);
     }
 
     /**

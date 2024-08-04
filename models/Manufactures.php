@@ -12,17 +12,20 @@ use Yii;
  * @property string|null $website
  * @property int|null $id_region
  * @property int|null $id_city
+ * @property int|null $id_district
  * @property string|null $address_loading
  * @property string|null $note
  * @property int|null $create_your_project
  * @property int|null $is_work
  *
  * @property City $city
- * @property Catalog[] $manufactureCatalogs
+ * @property Category[] $manufactureCategories
  * @property ManufactureContacts[] $manufactureContacts
  * @property ManufactureEmails[] $manufactureEmails
  * @property Products[] $manufactureProducts
  * @property City $region
+ * @property City $district
+ *
  */
 class Manufactures extends \yii\db\ActiveRecord
 {
@@ -41,11 +44,12 @@ class Manufactures extends \yii\db\ActiveRecord
     {
         return [
             [['name'], 'required'],
-            [['id_region', 'id_city', 'create_your_project', 'is_work'], 'integer'],
+            [['id_region', 'id_city', 'id_disctrict', 'create_your_project', 'is_work'], 'integer'],
             [['note'], 'string'],
             [['name', 'website', 'address_loading'], 'string', 'max' => 255],
             [['id_city'], 'exist', 'skipOnError' => true, 'targetClass' => City::class, 'targetAttribute' => ['id_city' => 'id']],
             [['id_region'], 'exist', 'skipOnError' => true, 'targetClass' => City::class, 'targetAttribute' => ['id_region' => 'id']],
+            [['id_district'], 'exist', 'skipOnError' => true, 'targetClass' => City::class, 'targetAttribute' => ['id_district' => 'id']],
         ];
     }
 
@@ -77,7 +81,8 @@ class Manufactures extends \yii\db\ActiveRecord
         return $this->hasOne(City::class, ['id' => 'id_city']);
     }
     public function getDistrict(){
-        return $this->hasOne(City::class, ['id' => $this->getRegion()->one()->parentid]);
+        // Получаем регион
+        return $this->hasOne(City::class, ['id' => 'id_district']);
     }
 
     /**
@@ -85,10 +90,10 @@ class Manufactures extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getManufactureCatalogs()
+    public function getManufactureCategories()
     {
-        return $this->hasMany(Catalog::class, ['id' => 'manufacture_id'])
-            ->viaTable('manufacture_catalog', ['manufacture_id' => 'id']);
+        return $this->hasMany(Category::class, ['id' => 'category_id'])
+            ->viaTable('manufacture_category', ['manufacture_id' => 'id']);
     }
 
     /**
