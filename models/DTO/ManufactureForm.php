@@ -2,7 +2,6 @@
 
 namespace app\models\DTO;
 
-use app\models\ManufactureCatalog;
 use app\models\Manufactures;
 use app\models\ManufactureEmails;
 use yii\base\Model;

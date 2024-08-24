@@ -37,7 +37,6 @@ class ProductController extends Controller
         $category_name = $queryParams['category_name'] ?? '';
         $searchName = $queryParams['checkbox_product'] ?? 0;
         $searchCategory = $queryParams['checkbox_category'] ?? 0;
-        $searchFavorite = $queryParams['checkbox_favorite'] ?? 0;
 
         $query = (new \yii\db\Query())
             ->select(['p.id', 'p.name', 'p.length', 'p.width', 'p.height', 'p.weight', 'c.name AS category_name'])
@@ -45,7 +44,7 @@ class ProductController extends Controller
             ->leftJoin('product_category pc', 'pc.product_id = p.id')
             ->leftJoin('category c', 'c.id = pc.category_id');
 
-        if ($searchFavorite){
+        if ($searchName && $searchCategory) {
             $query->andWhere(['like', 'p.name', $product_name]);
             $query->andWhere(['like', 'c.name', $category_name]);
         }

@@ -26,7 +26,7 @@ return [
     'POST api/v1/manufactures' => 'manufacture/create',
     'PUT api/v1/manufactures/<id:\d+>' => 'manufacture/update',
     'DELETE api/v1/manufactures/<id:\d+>' => 'manufacture/delete',
-    'GET api/v1/manufactures/search-in-manufactures' => 'manufacture/search-in-manufactures',
+    'GET api/v1/manufactures/search' => 'manufacture/search-in-manufactures',
 
     // Контакты производителей
     'POST api/v1/manufacture-contacts' => 'manufacture-contact/create',
@@ -38,10 +38,10 @@ return [
     'GET api/v1/cities' => 'city/index-parentid',
 
     // Продукты
-    'GET api/v1/products' => 'product/search',
+    'GET api/v1/products/search' => 'product/search',
 
     // Логистика
-    'POST api/v1/cars-logist' => 'cars-logist/create',
-    'GET api/v1/cars-logist' => 'cars-logist/search',
+    'POST api/v1/cars-logist/create' => 'cars-logist/create',
+    'GET api/v1/cars-logist/search' => 'cars-logist/search',
     'GET api/v1/cars-logist/type-cars' => 'cars-logist/index-type-cars',
 ];
