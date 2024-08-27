@@ -44,7 +44,7 @@ class Manufactures extends \yii\db\ActiveRecord
     {
         return [
             [['name'], 'required'],
-            [['id_region', 'id_city', 'id_disctrict', 'create_your_project', 'is_work'], 'integer'],
+            [['id_region', 'id_city', 'id_district', 'create_your_project', 'is_work'], 'integer'],
             [['note'], 'string'],
             [['name', 'website', 'address_loading'], 'string', 'max' => 255],
             [['id_city'], 'exist', 'skipOnError' => true, 'targetClass' => City::class, 'targetAttribute' => ['id_city' => 'id']],

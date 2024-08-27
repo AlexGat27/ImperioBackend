@@ -14,6 +14,7 @@ class ManufactureForm extends Model
     public $website;
     public $id_region;
     public $id_city;
+    public $id_district;
     public $address_loading;
     public $note;
     public $create_your_project;
@@ -24,7 +25,7 @@ class ManufactureForm extends Model
     {
         return [
             [['name', 'emails'], 'required'],
-            [['id_region', 'id_city', 'id_catalog'], 'integer'],
+            [['id_region', 'id_city', 'id_district'], 'integer'],
             [['create_your_project', 'is_work'], 'boolean'],
             [['note'], 'string'],
             [['name', 'website', 'address_loading'], 'string', 'max' => 255],
@@ -40,6 +41,7 @@ class ManufactureForm extends Model
             'website' => 'Website',
             'id_region' => 'Region',
             'id_city' => 'City',
+            'id_district' => 'District',
             'address_loading' => 'Loading Address',
             'note' => 'Note',
             'create_your_project' => 'Create Your Project',
@@ -55,6 +57,7 @@ class ManufactureForm extends Model
         $this->website = $model->website;
         $this->id_region = $model->id_region;
         $this->id_city = $model->id_city;
+        $this->id_district = $model->id_district;
         $this->address_loading = $model->address_loading;
         $this->note = $model->note;
         $this->create_your_project = $model->create_your_project;
