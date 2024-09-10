@@ -1,5 +1,5 @@
 <?php
-
+namespace app\services\manufactures;
 
 use yii\db\Query;
 

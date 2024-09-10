@@ -29,7 +29,11 @@ class CityController extends Controller
         return $behaviors;
     }
     public function actionIndexParentid($parentid){
-        $cities = City::find()->where(['parentid' => $parentid])->all();
+        if ($parentid){
+            $cities = City::find()->where(['parentid' => $parentid])->all();
+        }else{
+            $cities = City::find()->all();
+        }
         return $cities;
     }
 }

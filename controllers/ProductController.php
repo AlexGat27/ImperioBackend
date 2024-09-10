@@ -3,7 +3,6 @@
 namespace app\controllers;
 
 use app\components\Middleware\TokenFilter;
-use app\models\DTO\ProductsResponse;
 use app\models\Products;
 use Yii;
 use yii\filters\AccessControl;
@@ -33,8 +32,7 @@ class ProductController extends Controller
     public function actionSearch()
     {
         $queryParams = Yii::$app->request->getQueryParams();
-        $product_name = $queryParams['product_name'] ?? '';
-        $category_name = $queryParams['category_name'] ?? '';
+        $search_query = $queryParams['search_query'] ?? '';
         $searchName = $queryParams['checkbox_product'] ?? 0;
         $searchCategory = $queryParams['checkbox_category'] ?? 0;
 
@@ -44,15 +42,15 @@ class ProductController extends Controller
             ->leftJoin('product_category pc', 'pc.product_id = p.id')
             ->leftJoin('category c', 'c.id = pc.category_id');
 
-        if ($searchName && $searchCategory) {
-            $query->andWhere(['like', 'p.name', $product_name]);
-            $query->andWhere(['like', 'c.name', $category_name]);
+        if ($searchName == 'true' && $searchCategory == 'true') {
+            $query->andWhere(['like', 'p.name', $search_query]);
+            $query->andWhere(['like', 'c.name', $search_query]);
         }
-        elseif ($searchName) {
-            $query->andWhere(['like', 'p.name', $product_name]);
+        elseif ($searchName == 'true') {
+            $query->andWhere(['like', 'p.name', $search_query]);
         }
-        elseif ($searchCategory) {
-            $query->orWhere(['like', 'c.name', $category_name]);
+        elseif ($searchCategory == 'true') {
+            $query->orWhere(['like', 'c.name', $search_query]);
         }
         $products = $query->all();
         return $products;

@@ -68,7 +68,7 @@ class ManufactureForm extends Model
     public function save()
     {
         if (!$this->validate()) {
-            return false;
+            throw new \Exception('Validation failed');
         }
         if ($this->id) {
             $model = Manufactures::findOne($this->id);
@@ -77,6 +77,9 @@ class ManufactureForm extends Model
         }
 
         $model->attributes = $this->attributes;
+        $model->is_work = $this->is_work ? 1 : 0;
+        $model->create_your_project = $this->create_your_project ? 1 : 0;
+
         if ($model->save()) {
             ManufactureEmails::deleteAll(['id_manufacture' => $model->id]);
             if (is_string($this->emails)) {
@@ -90,12 +93,11 @@ class ManufactureForm extends Model
                 $emailModel->save();
             }
 
-            return [
-                "model" => $model,
+            return array_merge($model->getAttributes(), [
                 "emails" => $this->emails,
-            ];
+            ]);
         }
 
-        return false;
+        throw new \Exception('Cannot create manufacture model');
     }
 }

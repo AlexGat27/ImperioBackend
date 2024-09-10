@@ -1,6 +1,7 @@
 <?php
+namespace app\services\manufactures;
 
-
+use app\services\manufactures\BaseManufacturesQueryService;
 use yii\db\Query;
 
 class SearchManufacturesQueryService extends BaseManufacturesQueryService

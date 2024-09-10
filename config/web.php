@@ -75,6 +75,17 @@ $config = [
                 'sameSite' => \yii\web\Cookie::SAME_SITE_LAX,
             ],
         ],
+        'container' => [
+            'class' => yii\di\Container::class, // Добавьте этот элемент для указания класса
+            'definitions' => [
+                \app\services\manufactures\SearchManufacturesQueryService::class => [
+                    'class' => \app\services\manufactures\SearchManufacturesQueryService::class,
+                ],
+                \app\services\manufactures\GetManufacturesQueryService::class => [
+                    'class' => \app\services\manufactures\GetManufacturesQueryService::class,
+                ],
+            ],
+        ],
     ],
 
     'params' => $params,
